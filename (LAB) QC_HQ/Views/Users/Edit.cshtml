@@ -1,0 +1,176 @@
+﻿@model _LAB__QC_HQ.Models.ViewModels.EditUserVM
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="container">GetLevelDescription
+    <h1>Edit User</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-12">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row">
+                    <!-- Left Column: User Information -->
+                    <div class="col-md-6">
+                        <!-- ... your existing user info fields ... -->
+                    </div>
+
+                    <!-- Right Column: Department Assignments & Status -->
+                    <div class="col-md-6">
+                        <div class="form-group form-check mb-3">
+                            <input asp-for="IsActive" class="form-check-input" />
+                            <label asp-for="IsActive" class="form-check-label"></label>
+                            <span asp-validation-for="IsActive" class="text-danger"></span>
+                        </div>
+
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Department Assignments</h5>
+                            </div>
+                            <div class="card-body">
+                                @if (Model.Departments != null && Model.Departments.Any())
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Department</th>
+                                                    <th>Assigned</th>
+                                                    <th>Clearance Level</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @for (int i = 0; i < Model.Departments.Count; i++)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <input asp-for="Departments[i].IsSelected" class="form-check-input" />
+                                                            <input type="hidden" asp-for="Departments[i].DepartmentId" />
+                                                            <span class="ms-2">@Model.Departments[i].DepartmentName</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-secondary">
+                                                                Level: @Model.Departments[i].ClearanceLevel
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <select asp-for="Departments[i].ClearanceLevel"
+                                                                    class="form-control form-control-sm"
+                                                                    disabled="@(Model.Departments[i].IsSelected ? false : true)">
+                                                                <option value="0">0 - No Access</option>
+                                                                <option value="1">1 - Basic Access</option>
+                                                                <option value="2">2 - Advanced Access</option>
+                                                                <option value="3">3 - Full Access</option>
+                                                            </select>
+
+                                                            <input type="hidden"
+                                                                   name="Departments[@i].ClearanceLevel"
+                                                                   value="@Model.Departments[i].ClearanceLevel" />
+                                                        </td>
+
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-warning">
+                                        No departments available. Please create departments first.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- ... rest of your view ... -->
+                        <div class="mb-3">
+                            <label asp-for="UserName" class="form-label"></label>
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="FirstName" class="form-label"></label>
+                            <input asp-for="FirstName" class="form-control" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="LastName" class="form-label"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="JobTitle" class="form-label"></label>
+                            <input asp-for="JobTitle" class="form-control" />
+                            <span asp-validation-for="JobTitle" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="form-group mt-4">
+                    <div class="btn-group" role="group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info">
+                            <i class="fas fa-eye"></i> View Details
+                        </a>
+ <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).on('change', 'input[type="checkbox"]', function () {
+            const row = $(this).closest('tr');
+            const select = row.find('select');
+            const hidden = row.find('input[type="hidden"][name$=".ClearanceLevel"]');
+
+            select.prop('disabled', !this.checked);
+
+            if (!this.checked) {
+                select.val('0');
+                hidden.val('0');
+            } else {
+                hidden.val(select.val());
+            }
+        });
+
+        $(document).on('change', 'select', function () {
+            const row = $(this).closest('tr');
+            const hidden = row.find('input[type="hidden"][name$=".ClearanceLevel"]');
+            hidden.val($(this).val());
+        });
+    </script>
+}

@@ -1,0 +1,35 @@
+﻿@model _LAB__QC_HQ.Models.ViewModels.AssignRoleViewModel
+@using _LAB__QC_HQ.Models
+
+@{
+    ViewData["Title"] = "Assign Role to User";
+}
+
+<h2>Assign Role to User</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Assign">
+            <div class="form-group">
+                <label asp-for="UserId" class="control-label">Select User:</label>
+                <select asp-for="UserId" class="form-control"
+                        asp-items="@(new SelectList(ViewBag.Users, "Id", "Email"))">
+                    <option value="">-- Select User --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="RoleName" class="control-label">Select Role:</label>
+                <select asp-for="RoleName" class="form-control"
+                        asp-items="@(new SelectList(ViewBag.Roles, "Name", "Name"))">
+                    <option value="">-- Select Role --</option>
+                </select>
+            </div>
+
+            <div class="form-group mt-3">
+                <input type="submit" value="Assign Role" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
