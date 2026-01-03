@@ -1,4 +1,5 @@
 using _LAB__QC_HQ.Data;
+using _LAB__QC_HQ.Interfaces;
 using _LAB__QC_HQ.Models;
 using _LAB__QC_HQ.Services;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +18,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false; // Keep true to test email confirmation
     options.SignIn.RequireConfirmedEmail = false;
+    options.User.RequireUniqueEmail = true;
 
     // Optional: Relax password rules for testing
     options.Password.RequireDigit = true;
@@ -31,6 +33,9 @@ builder.Services.Configure<EmailSettings>(
 
 builder.Services.AddSingleton<IEmailSender, GmailEmailSender>();
 builder.Services.AddControllersWithViews();
+//added services for content and knowhow
+builder.Services.AddScoped<IContentService, ContentService>();
+builder.Services.AddScoped<IKnowHowService, KnowHowService>();
 
 var app = builder.Build();
 
