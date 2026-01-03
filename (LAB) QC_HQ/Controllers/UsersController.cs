@@ -80,7 +80,7 @@ namespace _LAB__QC_HQ.Controllers
         {
             if (!ModelState.IsValid) { 
                 PopulateDepartmentNames(model);
-            return View(model);
+                return View(model);
             }
 
             var user = new ApplicationUser
@@ -95,12 +95,12 @@ namespace _LAB__QC_HQ.Controllers
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
-
+            
             if (!result.Succeeded)
             {
                 foreach (var error in result.Errors)
-                    ModelState.AddModelError("", error.Description);
-
+                ModelState.AddModelError(nameof(model.Password), error.Description);
+                PopulateDepartmentNames(model);
                 return View(model);
             }
 
@@ -217,7 +217,6 @@ namespace _LAB__QC_HQ.Controllers
             }
             catch (DbUpdateException ex)
             {
-                // Optional: inspect errors for debugging
                 ModelState.AddModelError("", "An error occurred while updating the user.");
                 await PopulateDepartments(vm);
                 return View(vm);
@@ -227,34 +226,30 @@ namespace _LAB__QC_HQ.Controllers
         }
 
 
-
-
-        // GET: UsersController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
         // POST: UsersController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            if (id == null)
+                return NotFound();
+
+            var user = await _context.Users
+                .Include(u => u.UserDepartments)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null)
+                return NotFound();
+
+            // Remove related records FIRST
+            _context.UserDepartments.RemoveRange(user.UserDepartments);
+
+            // Remove user
+            await _userManager.DeleteAsync(user);
+
+            return RedirectToAction(nameof(Index));
         }
 
-
-        private async Task<bool> UserExistsAsync(string id)
-        {
-            return await _userManager.Users.AnyAsync(e => e.Id == id);
-        }
 
         private async Task PopulateDepartments(EditUserVM vm)
         {
