@@ -12,6 +12,10 @@ namespace _LAB__QC_HQ.Interfaces
             string userId,
             IEnumerable<DepartmentClearanceInput> departments);
 
-        bool CanUserViewContent(int contentId, string userId);
+
+        IEnumerable<Content> GetAllContent();
+        Content? GetContentById(int contentId);
+        KnowHowDetail? GetKnowHowDetail(int contentId);
+        IEnumerable<Content> GetBrowsableContent();
     }
 }

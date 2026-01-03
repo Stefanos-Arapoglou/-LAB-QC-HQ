@@ -3,6 +3,7 @@ using _LAB__QC_HQ.Interfaces;
 using _LAB__QC_HQ.Models;
 using _LAB__QC_HQ.Models.DTO;
 using _LAB__QC_HQ.Models.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace _LAB__QC_HQ.Services
 {
@@ -52,17 +53,32 @@ namespace _LAB__QC_HQ.Services
             return content;
         }
 
-        public bool CanUserViewContent(int contentId, string userId)
+
+        public IEnumerable<Content> GetBrowsableContent()
         {
-            return _db.ContentDepartments.Any(cd =>
-                cd.ContentId == contentId &&
-                _db.UserDepartments.Any(ud =>
-                    ud.UserId == userId &&
-                    ud.DepartmentId == cd.DepartmentId &&
-                    ud.ClearanceLevel >= cd.ClearanceLevelRequired
-                )
-            );
+            return _db.Contents
+                .Where(c => c.IsActive)
+                .Include(c => c.CreatedByNavigation)
+                .Include(c => c.ContentDepartments)
+                    .ThenInclude(cd => cd.Department)
+                .ToList();
         }
+
+        public IEnumerable<Content> GetAllContent()
+        {
+            return _db.Contents.Where(c => c.IsActive).ToList();
+        }
+
+        public Content? GetContentById(int contentId)
+        {
+            return _db.Contents.FirstOrDefault(c => c.ContentId == contentId && c.IsActive);
+        }
+
+        public KnowHowDetail? GetKnowHowDetail(int contentId)
+        {
+            return _db.KnowHowDetails.FirstOrDefault(k => k.ContentId == contentId && k.IsActive);
+        }
+
     }
 
 }
