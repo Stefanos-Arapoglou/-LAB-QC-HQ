@@ -1,4 +1,6 @@
-﻿namespace _LAB__QC_HQ.Models.Enums
+﻿using System.ComponentModel;
+
+namespace _LAB__QC_HQ.Models.Enums
 {
     public enum ContentType
     {

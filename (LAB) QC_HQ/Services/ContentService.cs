@@ -3,6 +3,7 @@ using _LAB__QC_HQ.Interfaces;
 using _LAB__QC_HQ.Models;
 using _LAB__QC_HQ.Models.DTO;
 using _LAB__QC_HQ.Models.Enums;
+using _LAB__QC_HQ.Models.Maps;
 using Microsoft.EntityFrameworkCore;
 
 namespace _LAB__QC_HQ.Services
@@ -29,7 +30,7 @@ namespace _LAB__QC_HQ.Services
             var content = new Content
             {
                 Title = title,
-                ContentType = contentType.ToString(),
+                ContentType = contentType.ToDbString(),
                 CreatedBy = userId,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true,
@@ -76,7 +77,37 @@ namespace _LAB__QC_HQ.Services
 
         public KnowHowDetail? GetKnowHowDetail(int contentId)
         {
-            return _db.KnowHowDetails.FirstOrDefault(k => k.ContentId == contentId && k.IsActive);
+            return _db.KnowHowDetails
+                .Include(k => k.Content)                     // Include the Content entity
+                    .ThenInclude(c => c.ContentDepartments) // Include Departments
+                        .ThenInclude(cd => cd.Department)
+                .Include(k => k.Content)
+                    .ThenInclude(c => c.Items)              // Include Items
+                .Include(k => k.Content)
+                    .ThenInclude(c => c.CreatedByNavigation)// Include CreatedBy navigation
+                .FirstOrDefault(k => k.ContentId == contentId && k.IsActive);
+        }
+
+        public IEnumerable<Department> GetAllDepartments()
+        {
+            return _db.Departments.OrderBy(d => d.Name).ToList();
+        }
+
+        public Item? GetItemById(int itemId)
+        {
+            return _db.Items.FirstOrDefault(i => i.ItemId == itemId);
+        }
+
+        public void AddItemToContent(int contentId, string itemType, string itemValue)
+        {
+            var item = new Item
+            {
+                ContentId = contentId,
+                ItemType = itemType,
+                ItemValue = itemValue
+            };
+            _db.Items.Add(item);
+            _db.SaveChanges();
         }
 
     }

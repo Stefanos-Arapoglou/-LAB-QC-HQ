@@ -33,10 +33,11 @@ builder.Services.Configure<EmailSettings>(
 
 builder.Services.AddSingleton<IEmailSender, GmailEmailSender>();
 builder.Services.AddControllersWithViews();
-//added services for content and knowhow
+//added services for content
 builder.Services.AddScoped<IContentService, ContentService>();
 builder.Services.AddScoped<IKnowHowService, KnowHowService>();
 builder.Services.AddScoped<IContentAuthorizationService, ContentAuthorizationService>();
+builder.Services.AddScoped<IItemService, ItemService>();
 
 var app = builder.Build();
 
