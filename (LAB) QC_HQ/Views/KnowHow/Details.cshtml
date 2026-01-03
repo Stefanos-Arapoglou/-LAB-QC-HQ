@@ -1,0 +1,114 @@
+﻿@model _LAB__QC_HQ.Models.KnowHowDetail
+
+@{
+    ViewData["Title"] = "Know-How Details";
+    var content = Model.Content;
+}
+
+<h2>@content.Title (@content.ContentType)</h2>
+
+<!-- 1) Basic Content Info -->
+<div class="mb-3">
+    <strong>Code:</strong> @Model.Code <br />
+    <strong>Risk Level:</strong> @Model.RiskLevel <br />
+    <strong>Created By:</strong> @content.CreatedByNavigation?.UserName ?? content.CreatedBy <br />
+    <strong>Created At:</strong> @content.CreatedAt.ToString("yyyy-MM-dd HH:mm") <br />
+    <strong>Times Viewed:</strong> @content.TimesViewed
+</div>
+
+<hr />
+
+<!-- 2) Departments and Clearance -->
+<h4>Departments & Clearance</h4>
+@if (content.ContentDepartments.Any())
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Department</th>
+                <th>Clearance Required</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cd in content.ContentDepartments)
+            {
+                <tr>
+                    <td>@cd.Department.Name</td>
+                    <td>@cd.ClearanceLevelRequired</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No department assignments.</p>
+}
+
+<hr />
+
+<!-- 3) Text Items -->
+<h4>Text Items</h4>
+@if (content.Items.Any(i => i.ItemType == "Text"))
+{
+    <ul>
+        @foreach (var item in content.Items.Where(i => i.ItemType == "Text"))
+        {
+            <li>@item.ItemValue</li>
+        }
+    </ul>
+}
+else
+{
+    <p>No text items.</p>
+}
+
+<hr />
+
+<!-- 4) Link Items -->
+<h4>Links</h4>
+@if (content.Items.Any(i => i.ItemType == "Link"))
+{
+    <ul>
+        @foreach (var item in content.Items.Where(i => i.ItemType == "Link"))
+        {
+            <li><a href="@item.ItemValue" target="_blank">@item.ItemValue</a></li>
+        }
+    </ul>
+}
+else
+{
+    <p>No links.</p>
+}
+
+<hr />
+
+<!-- 5) Files / Other Items -->
+<h4>Files / Downloads</h4>
+@if (content.Items.Any(i => i.ItemType == "File"))
+{
+    <ul>
+        @foreach (var item in Model.Content.Items)
+        {
+            @if (item.ItemType == "File")
+            {
+                <a href="@(Url.Action("DownloadItem", "Item", new { id = item.ItemId }))">
+                    @item.ItemValue
+                </a>
+            }
+            else if (item.ItemType == "Link")
+            {
+                <a href="@item.ItemValue" target="_blank">@item.ItemValue</a>
+            }
+            else
+            {
+                <p>@item.ItemValue</p>
+            }
+        }
+    </ul>
+}
+else
+{
+    <p>No files.</p>
+}
+</div>

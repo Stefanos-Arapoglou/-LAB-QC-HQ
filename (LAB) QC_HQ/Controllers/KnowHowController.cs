@@ -3,6 +3,7 @@ using _LAB__QC_HQ.Models;
 using _LAB__QC_HQ.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace _LAB__QC_HQ.Controllers
 {
@@ -14,54 +15,58 @@ namespace _LAB__QC_HQ.Controllers
             IContentService contentService,
             IContentAuthorizationService authService,
             IKnowHowService knowHowService,
-            UserManager<ApplicationUser> userManager)
-            : base(contentService, authService, userManager)
+            UserManager<ApplicationUser> userManager,
+            IWebHostEnvironment env,
+            IItemService itemService)
+            : base(contentService, authService, userManager, env, itemService)
         {
             _knowHowService = knowHowService;
-        }
-
-        // GET: /KnowHow
-        public IActionResult Index()
-        {
-            var content = _contentService
-                .GetAllContent()
-                .Where(c => CanView(c.ContentId))
-                .ToList();
-
-            return View(content);
         }
 
         // GET: /KnowHow/Create
         public IActionResult Create()
         {
+            ViewBag.Departments = _contentService.GetAllDepartments();
             return View(new CreateKnowHowViewModel());
         }
 
         // POST: /KnowHow/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(CreateKnowHowViewModel model)
+        public async Task<IActionResult> Create(CreateKnowHowViewModel model)
         {
             if (!ModelState.IsValid)
+            {
+                ViewBag.Departments = _contentService.GetAllDepartments();
                 return View(model);
+            }
 
-            var contentId = _knowHowService.CreateKnowHow(model, CurrentUserId);
+            // Use CurrentUserId from ContentController
+            var contentId = await _knowHowService.CreateKnowHowAsync(model, CurrentUserId);
 
             return RedirectToAction(nameof(Details), new { id = contentId });
         }
 
         // GET: /KnowHow/Details/5
-        public override IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
             if (!CanView(id))
                 return Forbid();
 
-            var knowHowDetail = _contentService.GetKnowHowDetail(id);
+            var knowHowDetail = await _knowHowService.GetKnowHowDetailAsync(id);
             if (knowHowDetail == null)
                 return NotFound();
 
-            return View("KnowHowDetails", knowHowDetail);
+            return View("Details", knowHowDetail); // Ensure your view is Views/KnowHow/Details.cshtml
+        }
+
+        // GET: /KnowHow
+        public IActionResult Index()
+        {
+            var content = _contentService.GetAllContent();
+            return View(content);
         }
     }
 }
+
 

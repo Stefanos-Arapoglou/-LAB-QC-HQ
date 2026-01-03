@@ -5,20 +5,22 @@ namespace _LAB__QC_HQ.Models.ViewModels
 {
     public class CreateKnowHowViewModel
     {
-        // Content
         [Required]
         [StringLength(200)]
         public string Title { get; set; } = null!;
 
-        // Know-how specific
         [StringLength(50)]
         public string? Code { get; set; }
 
         [Required]
         public byte RiskLevel { get; set; }
 
-        // Department + clearance assignments (MANDATORY)
+        // Departments / clearance (required)
         [MinLength(1, ErrorMessage = "At least one department must be selected.")]
         public List<DepartmentClearanceInput> Departments { get; set; } = new();
+
+        // Items
+        [MinLength(1, ErrorMessage = "At least one item must be added.")]
+        public List<CreateItemInput> Items { get; set; } = new();
     }
 }

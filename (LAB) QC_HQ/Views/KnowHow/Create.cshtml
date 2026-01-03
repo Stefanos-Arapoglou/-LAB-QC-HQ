@@ -1,0 +1,132 @@
+﻿@model _LAB__QC_HQ.Models.ViewModels.CreateKnowHowViewModel
+@{
+    ViewData["Title"] = "Create Know-How";
+}
+
+<h2>Create Know-How</h2>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Code" class="form-label"></label>
+        <input asp-for="Code" class="form-control" />
+        <span asp-validation-for="Code" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="RiskLevel" class="form-label"></label>
+        <select asp-for="RiskLevel" class="form-select">
+            <option value="1">Low</option>
+            <option value="2">Medium</option>
+            <option value="3">High</option>
+            <option value="4">Critical</option>
+        </select>
+        <span asp-validation-for="RiskLevel" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <h4>Departments & Clearance</h4>
+        <div id="departments-container">
+            @for (int i = 0; i < Model.Departments.Count; i++)
+            {
+                <div class="department-entry mb-2">
+                    <select asp-for="Departments[i].DepartmentId" class="form-select d-inline-block w-50">
+                        <option value="">-- Select Department --</option>
+                        @foreach (var dep in ViewBag.Departments as List<_LAB__QC_HQ.Models.Department>)
+                        {
+                            <option value="@dep.DepartmentId">@dep.Name</option>
+                        }
+                    </select>
+
+                    <select asp-for="Departments[i].ClearanceLevelRequired" class="form-select d-inline-block w-25">
+                        <option value="0">None</option>
+                        <option value="1">Viewer</option>
+                        <option value="2">Contributor</option>
+                        <option value="3">Manager</option>
+                    </select>
+                </div>
+            }
+        </div>
+
+        <button type="button" class="btn btn-secondary" id="add-department">Add Another Department</button>
+    </div>
+
+    <h4>Items</h4>
+    <div id="items-container">
+        <div class="item-entry mb-2">
+            <select name="Items[0].ItemType" class="form-select mb-1">
+                <option value="Text">Text</option>
+                <option value="Link">Link</option>
+                <option value="File">File</option>
+            </select>
+            <input name="Items[0].ItemValue"
+                   type="text"
+                   class="form-control mb-1"
+                   data-val="false" />
+            <input name="Items[0].FileUpload" type="file" class="form-control mb-1" />
+        </div>
+    </div>
+    <button type="button" class="btn btn-secondary mb-3" id="add-item">Add Another Item</button>
+    <br />
+   
+
+
+
+    <button type="submit" class="btn btn-primary">Create Know-How</button>
+</form>
+
+@section Scripts {
+    <script>
+        let itemIndex = 1;
+        document.getElementById("add-item").addEventListener("click", function () {
+            const container = document.getElementById("items-container");
+            const div = document.createElement("div");
+            div.classList.add("item-entry", "mb-2");
+            div.innerHTML = `
+                <select name="Items[${itemIndex}].ItemType" class="form-select mb-1">
+                    <option value="Text">Text</option>
+                    <option value="Link">Link</option>
+                    <option value="File">File</option>
+                </select>
+                 <input name="Items[${itemIndex}].ItemValue"
+        type="text"
+        class="form-control mb-1"
+        data-val="false" />
+
+                <input name="Items[${itemIndex}].FileUpload" type="file" class="form-control mb-1" />
+            `;
+            container.appendChild(div);
+            itemIndex++;
+        });
+
+        let depIndex = @Model.Departments.Count;
+
+        document.getElementById("add-department").addEventListener("click", function () {
+            const container = document.getElementById("departments-container"); // append inside this div
+            const div = document.createElement("div");
+            div.classList.add("department-entry", "mb-2");
+            div.innerHTML = `
+                <select name="Departments[${depIndex}].DepartmentId" class="form-select d-inline-block w-50">
+                    <option value="">-- Select Department --</option>
+                    @foreach (var dep in ViewBag.Departments as List<_LAB__QC_HQ.Models.Department>)
+                    {
+                            <option value="@dep.DepartmentId">@dep.Name</option>
+                    }
+                </select>
+
+                <select name="Departments[${depIndex}].ClearanceLevelRequired" class="form-select d-inline-block w-25">
+                    <option value="0">None</option>
+                    <option value="1">Viewer</option>
+                    <option value="2">Contributor</option>
+                    <option value="3">Manager</option>
+                </select>
+            `;
+            container.appendChild(div);
+            depIndex++;
+        });
+    </script>
+}

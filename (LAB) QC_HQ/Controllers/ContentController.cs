@@ -10,12 +10,20 @@ namespace _LAB__QC_HQ.Controllers
         protected readonly IContentService _contentService;
         protected readonly IContentAuthorizationService _authService;
         private readonly UserManager<ApplicationUser> _userManager;
+        protected readonly IWebHostEnvironment _env;
+        protected readonly IItemService _itemService;
 
-        protected ContentController(IContentService contentService, IContentAuthorizationService authService, UserManager<ApplicationUser> userManager)
+        protected ContentController(IContentService contentService, 
+            IContentAuthorizationService authService, 
+            UserManager<ApplicationUser> userManager, 
+            IWebHostEnvironment env,
+            IItemService itemService)
         {
             _contentService = contentService;
             _authService = authService;
             _userManager = userManager;
+            _env = env;
+            _itemService = itemService;
         }
 
         protected string CurrentUserId =>
@@ -34,7 +42,7 @@ namespace _LAB__QC_HQ.Controllers
         }
 
         // Shared details view logic
-        public virtual IActionResult Details(int id)
+/*        public virtual IActionResult Details(int id)
         {
             if (!CanView(id))
                 return Forbid();
@@ -44,6 +52,6 @@ namespace _LAB__QC_HQ.Controllers
                 return NotFound();
 
             return View("Details", content);
-        }
+        }*/
     }
 }
