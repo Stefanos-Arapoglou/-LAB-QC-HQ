@@ -21,5 +21,10 @@ namespace _LAB__QC_HQ.Interfaces
         Item? GetItemById(int itemId);
 
         void AddItemToContent(int contentId, string itemType, string itemValue);
+
+        Task<ContentType> GetContentTypeAsync(int contentId);
+
+        Task<bool> DeleteContentAsync(int contentId);
+
     }
 }

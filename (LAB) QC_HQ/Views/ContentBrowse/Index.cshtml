@@ -2,15 +2,22 @@
 
 <h2>Content List</h2>
 
-<table class="table table-bordered">
+<!-- Simple Search Box -->
+<div class="mb-3">
+    <input type="text" id="searchBox" class="form-control" placeholder="Search in all columns...">
+</div>
+
+<table class="table table-bordered" id="contentTable">
     <thead>
         <tr>
             <th>ID</th>
             <th>Title</th>
             <th>Type</th>
-            <th>Departments / Clearance</th>
+            <th>Items Count</th>
+            <th>Departments</th>
             <th>Created By</th>
             <th>Created At</th>
+            <th>Actions</th> <!-- New column -->
         </tr>
     </thead>
     <tbody>
@@ -18,24 +25,90 @@
         {
             <tr>
                 <td>@content.ContentId</td>
-                <td>@content.Title</td>
-                <td>@content.ContentType</td>
-
                 <td>
-                    <ul class="mb-0">
-                        @foreach (var cd in content.ContentDepartments)
-                        {
-                            <li>
-                                <strong>@cd.Department.Name</strong>
-                                (Clearance: @cd.ClearanceLevelRequired)
-                            </li>
-                        }
-                    </ul>
+                    <a asp-controller="ContentBrowse"
+                       asp-action="Details"
+                       asp-route-id="@content.ContentId"
+                       class="text-decoration-none">
+                        @content.Title
+                    </a>
                 </td>
-
-                <td>@content.CreatedByNavigation.UserName</td>
+                <td>@content.ContentType</td>
+                <td>
+                    <!-- Items Count - Update this with your actual property -->
+                    @content.Items?.Count() ?? 0
+                </td>
+                <td>
+                    @foreach (var cd in content.ContentDepartments)
+                    {
+                        <span class="badge bg-secondary me-1">
+                            @cd.Department.Name (@cd.ClearanceLevelRequired)
+                        </span>
+                    }
+                </td>
+                <td>@content.CreatedByNavigation?.UserName</td>
                 <td>@content.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>
+                    <!-- Delete Button -->
+                    <form asp-controller="ContentBrowse"
+                          asp-action="Delete"
+                          asp-route-id="@content.ContentId"
+                          method="post"
+                          onsubmit="return confirmDelete(this);"
+                          style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </form>
+                </td>
             </tr>
         }
     </tbody>
 </table>
+
+<!-- Minimal JavaScript for search and delete confirmation -->
+<script>
+    // Search function
+    document.getElementById('searchBox').addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#contentTable tbody tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Delete confirmation with content title
+    function confirmDelete(form) {
+        // Get the content title from the table row
+        const row = form.closest('tr');
+        const titleCell = row.querySelector('td:nth-child(2)');
+        const title = titleCell.textContent.trim();
+        const contentId = row.querySelector('td:first-child').textContent.trim();
+
+        return confirm(`Are you sure you want to delete content #${contentId}: "${title}"?\n\nThis action cannot be undone!`);
+    }
+</script>
+
+
+<style>
+    /* Make delete button more visible */
+    .btn-danger {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    /* Add some spacing between columns */
+    th, td {
+        padding: 0.75rem;
+        vertical-align: middle;
+    }
+
+        /* Make action column narrower */
+        th:nth-child(8), td:nth-child(8) {
+            width: 100px;
+            text-align: center;
+        }
+</style>

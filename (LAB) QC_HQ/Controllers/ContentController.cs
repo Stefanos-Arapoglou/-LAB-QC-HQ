@@ -41,17 +41,15 @@ namespace _LAB__QC_HQ.Controllers
             return _contentService.GetContentById(contentId);
         }
 
-        // Shared details view logic
-/*        public virtual IActionResult Details(int id)
+        protected bool CanDelete(int contentId)
         {
-            if (!CanView(id))
-                return Forbid();
+            return _authService.CanDelete(contentId, CurrentUserId);
+        }
 
-            var content = GetContent(id);
-            if (content == null)
-                return NotFound();
+        protected bool CanEdit(int contentId)
+        {
+            return _authService.CanEdit(contentId, CurrentUserId);
+        }
 
-            return View("Details", content);
-        }*/
     }
 }

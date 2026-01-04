@@ -110,6 +110,90 @@ namespace _LAB__QC_HQ.Services
             _db.SaveChanges();
         }
 
+        public async Task<ContentType> GetContentTypeAsync(int contentId)
+        {
+            // Get the string value from database (exactly as stored by ToDbString())
+            var contentTypeString = await _db.Contents
+                .Where(c => c.ContentId == contentId)
+                .Select(c => c.ContentType) // This returns string like "Know-How", "Educational", etc.
+                .FirstOrDefaultAsync();
+
+            if (string.IsNullOrEmpty(contentTypeString))
+                throw new KeyNotFoundException($"Content with ID {contentId} not found");
+
+            // Convert the database string back to ContentType enum
+            // Must match EXACTLY what ToDbString() produces
+            return contentTypeString switch
+            {
+                "Know-How" => ContentType.KnowHow,
+                "Educational" => ContentType.Educational,
+                "Announcement" => ContentType.Announcement,
+                "File" => ContentType.File,
+                _ => throw new InvalidOperationException($"Unknown content type string: {contentTypeString}")
+            };
+        }
+
+        // Add to ContentService class
+        public async Task<bool> DeleteContentAsync(int contentId)
+        {
+            using var transaction = await _db.Database.BeginTransactionAsync();
+
+            try
+            {
+                // 1. Get content type first
+                var contentType = await GetContentTypeAsync(contentId);
+
+                // 2. Delete type-specific records
+                switch (contentType)
+                {
+                    case ContentType.KnowHow:
+                        // Delete KnowHowDetails
+                        var knowHowDetails = await _db.KnowHowDetails
+                            .Where(k => k.ContentId == contentId)
+                            .ToListAsync();
+                        _db.KnowHowDetails.RemoveRange(knowHowDetails);
+                        break;
+
+                    case ContentType.Educational:
+                        // Delete Educational-specific records
+                        break;
+
+                        // Add other content types as needed
+                }
+
+                // 3. Delete related items
+                var items = await _db.Items
+                    .Where(i => i.ContentId == contentId)
+                    .ToListAsync();
+                _db.Items.RemoveRange(items);
+
+                // 4. Delete department associations
+                var departments = await _db.ContentDepartments
+                    .Where(cd => cd.ContentId == contentId)
+                    .ToListAsync();
+                _db.ContentDepartments.RemoveRange(departments);
+
+                // 5. Finally delete the Content record (HARD DELETE)
+                var content = await _db.Contents.FindAsync(contentId);
+                if (content != null)
+                {
+                    _db.Contents.Remove(content); // This is the hard delete
+                }
+
+                await _db.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+    }
     }
 
-}
+
+
+
+
