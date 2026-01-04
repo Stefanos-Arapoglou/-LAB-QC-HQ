@@ -66,6 +66,29 @@ namespace _LAB__QC_HQ.Controllers
             var content = _contentService.GetAllContent();
             return View(content);
         }
+
+        // POST: /KnowHow/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (!CanDelete(id)) // Use base class method or check directly
+                return Forbid();
+
+            try
+            {
+               
+                await _contentService.DeleteContentAsync(id);
+
+                TempData["SuccessMessage"] = "Know-How deleted successfully.";
+                return RedirectToAction("Index", "ContentBrowse");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error deleting Know-How: {ex.Message}";
+                return RedirectToAction("Details", new { id });
+            }
+        }
     }
 }
 

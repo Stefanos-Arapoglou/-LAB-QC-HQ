@@ -25,8 +25,28 @@
                         </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="ContentBrowse" asp-action="Index">Browse Content</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="contentDropdown" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    Content
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="contentDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="ContentBrowse" asp-action="Index">
+                                            View All
+                                        </a>
+                                    </li>
+                                    
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="" asp-controller="KnowHow" asp-action="Create">
+                                                Create Know How
+                                            </a>
+                                        </li>                
+                                    }
+                                </ul>
                             </li>
                         }
                         @if (User.IsInRole("Admin"))
