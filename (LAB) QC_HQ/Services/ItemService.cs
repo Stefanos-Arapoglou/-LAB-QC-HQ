@@ -27,43 +27,35 @@ namespace _LAB__QC_HQ.Services
                     if (input.FileUpload == null)
                         throw new InvalidOperationException("File item requires upload.");
 
-                    // Clean filename to remove any path info
                     var originalName = Path.GetFileName(input.FileUpload.FileName);
+                    var sanitizedName = string.Concat(
+                        originalName.Split(Path.GetInvalidFileNameChars())
+                    );
 
-                    // Sanitize: remove invalid characters
-                    var sanitizedFileName = string.Concat(originalName.Split(Path.GetInvalidFileNameChars()));
-
-                    // Ensure uploads folder exists
                     var uploads = Path.Combine(_env.WebRootPath, "uploads");
                     Directory.CreateDirectory(uploads);
 
-                    // Build initial path
-                    var path = Path.Combine(uploads, sanitizedFileName);
-
-                    // Prevent overwriting existing files
+                    var path = Path.Combine(uploads, sanitizedName);
                     int count = 1;
-                    while (System.IO.File.Exists(path))
+
+                    while (File.Exists(path))
                     {
-                        var fileNameWithoutExt = Path.GetFileNameWithoutExtension(sanitizedFileName);
-                        var ext = Path.GetExtension(sanitizedFileName);
-                        path = Path.Combine(uploads, $"{fileNameWithoutExt}({count}){ext}");
+                        var name = Path.GetFileNameWithoutExtension(sanitizedName);
+                        var ext = Path.GetExtension(sanitizedName);
+                        path = Path.Combine(uploads, $"{name}({count}){ext}");
                         count++;
                     }
 
-                    // Save file to disk
                     using var stream = new FileStream(path, FileMode.Create);
                     await input.FileUpload.CopyToAsync(stream);
 
-                    // Store the final file name in DB
                     value = Path.GetFileName(path);
                 }
                 else
                 {
-                    // Text or Link items
                     value = input.ItemValue!;
                 }
 
-                // Add to DB
                 _db.Items.Add(new Item
                 {
                     ContentId = contentId,
@@ -75,14 +67,14 @@ namespace _LAB__QC_HQ.Services
             await _db.SaveChangesAsync();
         }
 
-        public async Task<Item?> GetItemAsync(int itemId)
+        public async Task<Item?> GetItemByIdAsync(int itemId)
         {
             return await _db.Items.FindAsync(itemId);
         }
 
         public async Task<(byte[] data, string fileName)> GetFileAsync(int itemId)
         {
-            var item = await _db.Items.FindAsync(itemId);
+            var item = await GetItemByIdAsync(itemId);
             if (item == null || item.ItemType != "File")
                 throw new FileNotFoundException();
 
@@ -90,6 +82,23 @@ namespace _LAB__QC_HQ.Services
             var data = await File.ReadAllBytesAsync(path);
 
             return (data, item.ItemValue);
+        }
+
+        public async Task DeleteItemAsync(int itemId)
+        {
+            var item = await GetItemByIdAsync(itemId);
+            if (item == null)
+                return;
+
+            if (item.ItemType == "File")
+            {
+                var path = Path.Combine(_env.WebRootPath, "uploads", item.ItemValue);
+                if (File.Exists(path))
+                    File.Delete(path);
+            }
+
+            _db.Items.Remove(item);
+            await _db.SaveChangesAsync();
         }
     }
 }

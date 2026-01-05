@@ -18,9 +18,6 @@ namespace _LAB__QC_HQ.Interfaces
         KnowHowDetail? GetKnowHowDetail(int contentId);
         IEnumerable<Content> GetBrowsableContent();
         IEnumerable<Department> GetAllDepartments();
-        Item? GetItemById(int itemId);
-
-        void AddItemToContent(int contentId, string itemType, string itemValue);
 
         Task<ContentType> GetContentTypeAsync(int contentId);
 
