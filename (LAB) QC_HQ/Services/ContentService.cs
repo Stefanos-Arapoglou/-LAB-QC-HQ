@@ -93,23 +93,6 @@ namespace _LAB__QC_HQ.Services
             return _db.Departments.OrderBy(d => d.Name).ToList();
         }
 
-        public Item? GetItemById(int itemId)
-        {
-            return _db.Items.FirstOrDefault(i => i.ItemId == itemId);
-        }
-
-        public void AddItemToContent(int contentId, string itemType, string itemValue)
-        {
-            var item = new Item
-            {
-                ContentId = contentId,
-                ItemType = itemType,
-                ItemValue = itemValue
-            };
-            _db.Items.Add(item);
-            _db.SaveChanges();
-        }
-
         public async Task<ContentType> GetContentTypeAsync(int contentId)
         {
             // Get the string value from database (exactly as stored by ToDbString())
