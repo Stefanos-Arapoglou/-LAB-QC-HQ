@@ -1,0 +1,60 @@
+﻿@model _LAB__QC_HQ.Models.ViewModels.EditKnowHowViewModel
+
+@{
+    ViewData["Title"] = "Edit Know-How";
+}
+
+<h2>Edit Know-How</h2>
+
+<form asp-action="Edit" method="post">
+    <partial name="_ContentEditBase" model="Model" />
+
+    <!-- KnowHow-specific fields -->
+    <div class="mb-3">
+        <label asp-for="Code"></label>
+        <input asp-for="Code" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="RiskLevel"></label>
+        <select asp-for="RiskLevel" class="form-select">
+            <option value="1">Low</option>
+            <option value="2">Medium</option>
+            <option value="3">High</option>
+            <option value="4">Critical</option>
+        </select>
+    </div>
+    <h4>Items</h4>
+    @await Html.PartialAsync("_ItemsEditor", Model.Items)
+
+
+
+
+    <button type="submit" class="btn btn-primary">Save changes</button>
+</form>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            initItemsEditor("items-container", "add-item");
+
+            // If you want to pre-load departments options
+            setDepartmentsOptions(`
+                @foreach (var dep in ViewBag.Departments)
+                {
+                        <option value="@dep.DepartmentId">@dep.Name</option>
+                }
+            `);
+        });
+
+        window.departmentsOptions = `
+            @foreach (var dep in ViewBag.Departments)
+            {
+                    <option value="@dep.DepartmentId">@dep.Name</option>
+            }
+        `;
+    </script>
+
+    <script src="~/js/departments-editor.js"></script>
+    <script src="~/js/content-items.js"></script>
+    }

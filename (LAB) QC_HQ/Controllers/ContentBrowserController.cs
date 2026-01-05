@@ -28,12 +28,24 @@ _userManager.GetUserId(User)!;
         // GET: /Content
         public IActionResult Index()
         {
-            var content = _contentService
-                .GetBrowsableContent()
-                .Where(c => _authService.CanView(c.ContentId, CurrentUserId))
-                .ToList();
+            if (User.IsInRole("Admin"))
+            {
+                var content = _contentService
+                    .GetAllContentIncludingInactive()
+                    .Where(c => _authService.CanView(c.ContentId, CurrentUserId))
+                    .ToList();
 
-            return View(content);
+                return View(content);
+            }
+            else
+            {
+                var content = _contentService
+    .GetBrowsableContent()
+    .Where(c => _authService.CanView(c.ContentId, CurrentUserId))
+    .ToList();
+
+                return View(content);
+            }
         }
 
         // URL: /ContentBrowse/Details/5
@@ -58,6 +70,11 @@ _userManager.GetUserId(User)!;
             };
         }
 
+
+
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -78,6 +95,28 @@ _userManager.GetUserId(User)!;
                 TempData["ErrorMessage"] = $"Error: {ex.Message}";
                 return RedirectToAction("Index");
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Activate(int id)
+        {
+            if (!User.IsInRole("Admin"))
+                return Forbid();
+
+            await _contentService.ActivateContentAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Deactivate(int id)
+        {
+            if (!User.IsInRole("Admin"))
+                return Forbid();
+
+            await _contentService.DeactivateContentAsync(id);
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -2,17 +2,21 @@
 
 namespace _LAB__QC_HQ.Models.DTO
 {
-    public class CreateItemInput
+    public class EditItemInput
     {
+        public EditItemInput() { }
+        public int ItemId { get; set; } // ✅ Needed for updates
+
         [Required]
         public string ItemType { get; set; } = "Text"; // Text / Link / File
 
-        public string ItemTitle { get; set; } = null!; // ✅ NEW
+        [Required]
+        public string ItemTitle { get; set; } = null!; // Title / Description
 
         [StringLength(5000)]
         public string? ItemValue { get; set; }
 
-        // For files
+        // For file uploads
         public IFormFile? FileUpload { get; set; }
     }
 }

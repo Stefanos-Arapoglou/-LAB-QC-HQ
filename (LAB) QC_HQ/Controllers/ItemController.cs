@@ -1,4 +1,5 @@
 ﻿using _LAB__QC_HQ.Interfaces;
+using _LAB__QC_HQ.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 
 namespace _LAB__QC_HQ.Controllers
@@ -7,31 +8,42 @@ namespace _LAB__QC_HQ.Controllers
     {
         private readonly IContentService _contentService;
         private readonly IWebHostEnvironment _env;
+        private readonly IItemService _itemService;
 
-        public ItemController(IContentService contentService, IWebHostEnvironment env)
+        public ItemController(IContentService contentService, IWebHostEnvironment env, IItemService itemService)
         {
             _contentService = contentService;
             _env = env;
+            _itemService = itemService;
         }
 
-        // GET: /Item/DownloadItem/5
-        public IActionResult DownloadItem(int id)
+        public async Task<IActionResult> DownloadItem(int id)
         {
-            // Get the item from the database
-            var item = _contentService.GetItemById(id);
-            if (item == null || item.ItemType != "File")
+            try
+            {
+                var (data, fileName) = await _itemService.GetFileAsync(id);
+
+                // You can improve MIME detection later if needed
+                var contentType = "application/octet-stream";
+
+                return File(data, contentType, fileName);
+            }
+            catch (FileNotFoundException)
+            {
                 return NotFound();
-
-            // Build the physical file path (adjust folder as needed)
-            var filePath = Path.Combine(_env.WebRootPath, "uploads", item.ItemValue);
-            if (!System.IO.File.Exists(filePath))
-                return NotFound();
-
-            // Determine MIME type (optional: improve with real MIME detection)
-            var mimeType = "application/octet-stream";
-
-            // Return the file
-            return PhysicalFile(filePath, mimeType, item.ItemValue);
+            }
         }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateItems(int contentId, List<EditItemInput> items)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            await _itemService.UpdateItemsAsync(contentId, items);
+            return Ok();
+        }
+
     }
 }

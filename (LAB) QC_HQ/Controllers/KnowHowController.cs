@@ -1,5 +1,6 @@
 ﻿using _LAB__QC_HQ.Interfaces;
 using _LAB__QC_HQ.Models;
+using _LAB__QC_HQ.Models.DTO;
 using _LAB__QC_HQ.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -89,6 +90,63 @@ namespace _LAB__QC_HQ.Controllers
                 return RedirectToAction("Details", new { id });
             }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Deactivate(int id)
+        {
+            if (!CanEdit(id))
+                return Forbid();
+
+            await _contentService.DeactivateContentAsync(id);
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Activate(int id)
+        {
+            if (!CanEdit(id))
+                return Forbid();
+
+            await _contentService.ActivateContentAsync(id);
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+
+        public async Task<IActionResult> Edit(int id)
+        {
+            if (!CanEdit(id))
+                return Forbid();
+
+            var vm = await _knowHowService.GetEditViewModelAsync(id);
+            if (vm == null)
+                return NotFound();
+
+            ViewBag.Departments = _contentService.GetAllDepartments();
+            return View(vm);
+        }
+
+        // POST: /KnowHow/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, EditKnowHowViewModel model)
+        {
+            if (!CanEdit(id))
+                return Forbid();
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Departments = _contentService.GetAllDepartments();
+                return View(model);
+            }
+
+            await _knowHowService.UpdateKnowHowAsync(id, model);
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+
     }
 }
 

@@ -10,5 +10,10 @@ namespace _LAB__QC_HQ.Interfaces
 
         // Get a KnowHowDetail by contentId
         Task<KnowHowDetail?> GetKnowHowDetailAsync(int contentId);
+
+        Task UpdateKnowHowAsync(int contentId, EditKnowHowViewModel model);
+
+        Task<EditKnowHowViewModel?> GetEditViewModelAsync(int contentId);
+
     }
 }

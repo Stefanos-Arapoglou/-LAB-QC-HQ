@@ -62,6 +62,17 @@ namespace _LAB__QC_HQ.Services
                 .Include(c => c.CreatedByNavigation)
                 .Include(c => c.ContentDepartments)
                     .ThenInclude(cd => cd.Department)
+                .Include(c => c.Items)
+                .ToList();
+        }
+
+        public IEnumerable<Content> GetAllContentIncludingInactive()
+        {
+            return _db.Contents
+                .Include(c => c.Items)
+                .Include(c => c.ContentDepartments)
+                    .ThenInclude(cd => cd.Department)
+                .Include(c => c.CreatedByNavigation)
                 .ToList();
         }
 
@@ -91,23 +102,6 @@ namespace _LAB__QC_HQ.Services
         public IEnumerable<Department> GetAllDepartments()
         {
             return _db.Departments.OrderBy(d => d.Name).ToList();
-        }
-
-        public Item? GetItemById(int itemId)
-        {
-            return _db.Items.FirstOrDefault(i => i.ItemId == itemId);
-        }
-
-        public void AddItemToContent(int contentId, string itemType, string itemValue)
-        {
-            var item = new Item
-            {
-                ContentId = contentId,
-                ItemType = itemType,
-                ItemValue = itemValue
-            };
-            _db.Items.Add(item);
-            _db.SaveChanges();
         }
 
         public async Task<ContentType> GetContentTypeAsync(int contentId)
@@ -190,6 +184,78 @@ namespace _LAB__QC_HQ.Services
                 throw;
             }
         }
+
+        public async Task UpdateContentAsync(
+            int contentId,
+            string title,
+            IEnumerable<DepartmentClearanceInput> departments)
+        {
+            var content = await _db.Contents
+                .Include(c => c.ContentDepartments)
+                .FirstOrDefaultAsync(c => c.ContentId == contentId);
+
+            if (content == null)
+                throw new KeyNotFoundException($"Content {contentId} not found.");
+
+            // 1️⃣ Update scalar fields
+            content.Title = title.Trim();
+
+            // 2️⃣ Validate departments
+            var departmentList = departments
+                .Where(d => d.DepartmentId > 0)
+                .ToList();
+
+            if (!departmentList.Any())
+                throw new InvalidOperationException(
+                    "At least one department must be assigned.");
+
+            // ❗ Enforce uniqueness
+            if (departmentList
+                .GroupBy(d => d.DepartmentId)
+                .Any(g => g.Count() > 1))
+            {
+                throw new InvalidOperationException(
+                    "Each department can only be assigned once.");
+            }
+
+            // 3️⃣ Replace department assignments (safe way)
+            _db.ContentDepartments.RemoveRange(content.ContentDepartments);
+
+            foreach (var dep in departmentList)
+            {
+                _db.ContentDepartments.Add(new ContentDepartment
+                {
+                    ContentId = contentId,
+                    DepartmentId = dep.DepartmentId,
+                    ClearanceLevelRequired = dep.ClearanceLevelRequired
+                });
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+
+        public async Task ActivateContentAsync(int contentId)
+        {
+            var content = await _db.Contents.FindAsync(contentId);
+            if (content == null)
+                throw new KeyNotFoundException();
+
+            content.IsActive = true;
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task DeactivateContentAsync(int contentId)
+        {
+            var content = await _db.Contents.FindAsync(contentId);
+            if (content == null)
+                throw new KeyNotFoundException();
+
+            content.IsActive = false;
+            await _db.SaveChangesAsync();
+        }
+
+
     }
     }
 

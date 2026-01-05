@@ -1,0 +1,41 @@
+﻿@model List<_LAB__QC_HQ.Models.DTO.DepartmentClearanceInput>
+
+<h5>Departments & Clearance</h5>
+
+<div id="departments-container">
+    @for (int i = 0; i < Model.Count; i++)
+    {
+        <div class="department-entry mb-2">
+            <select name="Departments[@i].DepartmentId"
+                    class="form-select d-inline-block w-50">
+                <option value="">-- Select Department --</option>
+                @foreach (var dep in ViewBag.Departments)
+                {
+                    <option value="@dep.DepartmentId"
+                            selected="@(dep.DepartmentId == Model[i].DepartmentId)">
+                        @dep.Name
+                    </option>
+                }
+            </select>
+
+            <select name="Departments[@i].ClearanceLevelRequired"
+                    class="form-select d-inline-block w-25">
+                <option value="0" selected="@(Model[i].ClearanceLevelRequired == 0)">None</option>
+                <option value="1" selected="@(Model[i].ClearanceLevelRequired == 1)">Viewer</option>
+                <option value="2" selected="@(Model[i].ClearanceLevelRequired == 2)">Contributor</option>
+                <option value="3" selected="@(Model[i].ClearanceLevelRequired == 3)">Manager</option>
+            </select>
+
+            <button type="button"
+                    class="btn btn-outline-danger btn-sm remove-department">
+                ✖
+            </button>
+        </div>
+    }
+</div>
+
+<button type="button"
+        class="btn btn-secondary mt-2"
+        id="add-department">
+    Add Department
+</button>

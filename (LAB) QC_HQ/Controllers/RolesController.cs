@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using _LAB__QC_HQ.Models;
 
-[Authorize(Roles = "Admin")] 
+/*[Authorize(Roles = "Admin")] */
 public class RolesController : Controller
 {
     private readonly RoleManager<IdentityRole> _roleManager;

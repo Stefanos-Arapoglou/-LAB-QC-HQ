@@ -102,7 +102,7 @@ namespace _LAB__QC_HQ.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+/*        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
 
@@ -136,6 +136,65 @@ namespace _LAB__QC_HQ.Areas.Identity.Pages.Account
 
             // If we got this far, something failed, redisplay form
             return Page();
+        }*/
+
+
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        {
+            returnUrl ??= Url.Content("~/");
+
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            if (!ModelState.IsValid)
+                return Page();
+
+            // 1️⃣ Find user by EMAIL (not username)
+            var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
+
+            if (user == null)
+            {
+                // Do not reveal whether the email exists
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return Page();
+            }
+
+            // Optional: custom rule (example)
+            // if (!user.IsActive)
+            // {
+            //     ModelState.AddModelError(string.Empty, "This account is disabled.");
+            //     return Page();
+            // }
+
+            // 2️⃣ Sign in using USERNAME (Identity requirement)
+            var result = await _signInManager.PasswordSignInAsync(
+                user.UserName,               // 🔑 MUST be UserName
+                Input.Password,
+                Input.RememberMe,
+                lockoutOnFailure: false
+            );
+
+            // 3️⃣ Handle results
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User logged in.");
+                return LocalRedirect(returnUrl);
+            }
+
+            if (result.RequiresTwoFactor)
+            {
+                return RedirectToPage("./LoginWith2fa",
+                    new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
+            }
+
+            if (result.IsLockedOut)
+            {
+                _logger.LogWarning("User account locked out.");
+                return RedirectToPage("./Lockout");
+            }
+
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            return Page();
         }
+
     }
 }

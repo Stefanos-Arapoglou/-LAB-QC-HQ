@@ -1,0 +1,22 @@
+﻿@model List<_LAB__QC_HQ.Models.DTO.EditItemInput>
+
+<div id="items-container">
+    @for (int i = 0; i < Model.Count; i++)
+    {
+        var item = Model[i];
+        <!-- Create a variable -->
+        <div class="item-entry mb-3 border p-2 rounded">
+            <!-- Now use the variable -->
+            <input asp-for="@item.ItemId" type="hidden" />
+            <input asp-for="@item.ItemTitle" class="form-control mb-1" placeholder="Item title / description" required />
+            <select asp-for="@item.ItemType" class="form-select mb-1">
+                <option value="Text">Text</option>
+                <option value="Link">Link</option>
+                <option value="File">File</option>
+            </select>
+            <input asp-for="@item.ItemValue" class="form-control mb-1" placeholder="Text or link (not required for files)" />
+            <input asp-for="@item.FileUpload" type="file" class="form-control mb-1" />
+            <button type="button" class="btn btn-outline-danger btn-sm remove-item">✖</button>
+        </div>
+    }
+</div>

@@ -173,33 +173,50 @@ namespace _LAB__QC_HQ.Controllers
         {
             if (!ModelState.IsValid)
             {
-                foreach (var kv in ModelState)
-                {
-                    var errors = string.Join(", ", kv.Value.Errors.Select(e => e.ErrorMessage));
-                    Debug.WriteLine($"Key: {kv.Key}, Invalid: {kv.Value.ValidationState}, Errors: {errors}");
-                }
+                await PopulateDepartments(vm);
+                return View(vm);
             }
 
-            // Get user from DbContext including related departments
-            var user = await _context.Users
+            // ✅ ALWAYS load Identity user via UserManager
+            var user = await _userManager.Users
                 .Include(u => u.UserDepartments)
                 .FirstOrDefaultAsync(u => u.Id == vm.Id);
 
             if (user == null) return NotFound();
 
-            // Update basic user info
-            user.UserName = vm.UserName;
-            user.Email = vm.Email;
+            // ✅ Identity-safe updates
+            if (user.UserName != vm.UserName)
+            {
+                var result = await _userManager.SetUserNameAsync(user, vm.UserName);
+                if (!result.Succeeded)
+                {
+                    AddErrors(result);
+                    await PopulateDepartments(vm);
+                    return View(vm);
+                }
+            }
+
+            if (user.Email != vm.Email)
+            {
+                var result = await _userManager.SetEmailAsync(user, vm.Email);
+                if (!result.Succeeded)
+                {
+                    AddErrors(result);
+                    await PopulateDepartments(vm);
+                    return View(vm);
+                }
+            }
+
+            // ✅ Non-Identity fields (safe to set directly)
             user.FirstName = vm.FirstName;
             user.LastName = vm.LastName;
             user.JobTitle = vm.JobTitle;
             user.HireDate = vm.HireDate;
             user.IsActive = vm.IsActive;
 
-            // Remove old UserDepartments
+            // ✅ Update departments
             user.UserDepartments.Clear();
 
-            // Add selected departments
             foreach (var d in vm.Departments.Where(x => x.IsSelected))
             {
                 user.UserDepartments.Add(new UserDepartment
@@ -210,17 +227,8 @@ namespace _LAB__QC_HQ.Controllers
                 });
             }
 
-            try
-            {
-                // Save all changes in one SaveChangesAsync call
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException ex)
-            {
-                ModelState.AddModelError("", "An error occurred while updating the user.");
-                await PopulateDepartments(vm);
-                return View(vm);
-            }
+            // ✅ Persist everything
+            await _userManager.UpdateAsync(user);
 
             return RedirectToAction(nameof(Index));
         }
@@ -272,6 +280,15 @@ namespace _LAB__QC_HQ.Controllers
             foreach (var dept in model.Departments)
             {
                 dept.DepartmentName = departmentLookup[dept.DepartmentId];
+            }
+        }
+
+
+        private void AddErrors(IdentityResult result)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
             }
         }
     }

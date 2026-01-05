@@ -17,14 +17,18 @@ namespace _LAB__QC_HQ.Interfaces
         Content? GetContentById(int contentId);
         KnowHowDetail? GetKnowHowDetail(int contentId);
         IEnumerable<Content> GetBrowsableContent();
-        IEnumerable<Department> GetAllDepartments();
-        Item? GetItemById(int itemId);
 
-        void AddItemToContent(int contentId, string itemType, string itemValue);
+        IEnumerable<Content> GetAllContentIncludingInactive();
+        IEnumerable<Department> GetAllDepartments();
 
         Task<ContentType> GetContentTypeAsync(int contentId);
 
         Task<bool> DeleteContentAsync(int contentId);
+
+        Task UpdateContentAsync(int contentId, string title, IEnumerable<DepartmentClearanceInput> departments);
+
+        Task ActivateContentAsync(int contentId);
+        Task DeactivateContentAsync(int contentId);
 
     }
 }

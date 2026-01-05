@@ -54,7 +54,9 @@ else
     <ul>
         @foreach (var item in content.Items.Where(i => i.ItemType == "Text"))
         {
-            <li>@item.ItemValue</li>
+            <li>@item.ItemTitle</li>
+            @item.ItemValue
+            <br><br />
         }
     </ul>
 }
@@ -72,7 +74,10 @@ else
     <ul>
         @foreach (var item in content.Items.Where(i => i.ItemType == "Link"))
         {
-            <li><a href="@item.ItemValue" target="_blank">@item.ItemValue</a></li>
+            <li>@item.ItemTitle: </li>
+            <a href="@item.ItemValue" target="_blank">@item.ItemValue</a>
+            <br /><Br />
+
         }
     </ul>
 }
@@ -92,9 +97,12 @@ else
         {
             @if (item.ItemType == "File")
             {
+                <li>@item.ItemTitle: </li>
                 <a href="@(Url.Action("DownloadItem", "Item", new { id = item.ItemId }))">
                     @item.ItemValue
                 </a>
+                <br />
+                <br />
             }
 
         }
