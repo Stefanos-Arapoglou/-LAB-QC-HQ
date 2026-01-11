@@ -50,7 +50,16 @@
                 <td>@content.CreatedByNavigation?.UserName</td>
                 <td>@content.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
                 @if (User.IsInRole("Admin")){
+
                 <td>
+                    <form asp-controller="ContentBrowse"
+                          asp-action="Edit"
+                          asp-route-id="@content.ContentId">
+                        <button type="submit" class="btn btn-sm">
+                            <i class="bi bi-trash"></i> Edit
+                        </button>
+                    </form>
+
                     @if (content.IsActive)
                     {
                         <form asp-controller="ContentBrowse"

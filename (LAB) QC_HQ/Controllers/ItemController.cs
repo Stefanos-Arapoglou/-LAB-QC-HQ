@@ -36,7 +36,7 @@ namespace _LAB__QC_HQ.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> UpdateItems(int contentId, List<EditItemInput> items)
+        public async Task<IActionResult> UpdateItems(int contentId, List<CreateItemInput> items)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

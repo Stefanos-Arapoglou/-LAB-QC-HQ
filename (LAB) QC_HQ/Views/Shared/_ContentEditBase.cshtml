@@ -9,7 +9,7 @@
 
 <hr />
 
-<h5>Departments & Clearance</h5>
+@* <h5>Departments & Clearance</h5>
 
 <div id="departments-container">
     @for (int i = 0; i < Model.Departments.Count; i++)
@@ -25,10 +25,10 @@
 
             <select asp-for="Departments[i].ClearanceLevelRequired"
                     class="form-select w-auto" style="flex: 1;">
-                <option value="0">None</option>
-                <option value="1">Viewer</option>
-                <option value="2">Contributor</option>
-                <option value="3">Manager</option>
+                <option value="0">0 - No Access</option>
+                <option value="1">1 - Basic Access</option>
+                <option value="2">2 - Advanced Access</option>
+                <option value="3">3 - Full Access</option>
             </select>
         </div>
     }
@@ -38,5 +38,5 @@
         class="btn btn-secondary"
         id="add-department">
     Add Department
-</button>
+</button> *@
 <hr />

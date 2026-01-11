@@ -28,60 +28,20 @@
         </select>
         <span asp-validation-for="RiskLevel" class="text-danger"></span>
     </div>
+
     <div class="mb-3">
-        <h4>Departments & Clearance</h4>
-        <div id="departments-container">
-            @for (int i = 0; i < Model.Departments.Count; i++)
-            {
-                <div class="department-entry mb-2">
-                    <select asp-for="Departments[i].DepartmentId" class="form-select d-inline-block w-50">
-                        <option value="">-- Select Department --</option>
-                        @foreach (var dep in ViewBag.Departments as List<_LAB__QC_HQ.Models.Department>)
-                        {
-                            <option value="@dep.DepartmentId">@dep.Name</option>
-                        }
-                    </select>
-
-                    <select asp-for="Departments[i].ClearanceLevelRequired" class="form-select d-inline-block w-25">
-                        <option value="0">None</option>
-                        <option value="1">Viewer</option>
-                        <option value="2">Contributor</option>
-                        <option value="3">Manager</option>
-                    </select>
-                </div>
-            }
-        </div>
-
-        <button type="button" class="btn btn-secondary" id="add-department">Add Another Department</button>
+        <partial name="_DepartmentsEditor" model="Model"/>
     </div>
+
+@*     <h4>Items</h4>
+    @await Html.PartialAsync("_ItemsEditor", Model.Items) *@
+    @* <button type="button" class="btn btn-secondary mb-3" id="add-item">Add Another Item</button> *@
+    <br />
 
     <h4>Items</h4>
-    <div id="items-container">
-        <div class="item-entry mb-3 border p-2 rounded">
-            <input name="Items[0].ItemTitle"
-                   type="text"
-                   class="form-control mb-1"
-                   placeholder="Item title / description"
-                   required />
-
-            <select name="Items[0].ItemType" class="form-select mb-1">
-                <option value="Text">Text</option>
-                <option value="Link">Link</option>
-                <option value="File">File</option>
-            </select>
-
-            <input name="Items[0].ItemValue"
-                   type="text"
-                   class="form-control mb-1"
-                   placeholder="Text or link (not required for files)" />
-
-            <input name="Items[0].FileUpload"
-                   type="file"
-                   class="form-control mb-1" />
-        </div>
-    </div>
-    <button type="button" class="btn btn-secondary mb-3" id="add-item">Add Another Item</button>
+    <partial name="_ItemsEditor" model="Model.Items" />
     <br />
+
    
 
 

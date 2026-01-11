@@ -3,6 +3,231 @@
 @{
     ViewData["Title"] = "Know-How Details";
     var content = Model.Content;
+
+    // Sort items by their DisplayOrder (0 comes first, then 1, 2, etc.)
+    var orderedItems = content.Items?.OrderBy(i => i.DisplayOrder).ToList() ?? new List<Item>();
+    var textAndLinkItems = orderedItems.Where(i => i.ItemType != "File").ToList();
+    var fileItems = orderedItems.Where(i => i.ItemType == "File").ToList();
+}
+
+<h2>@content.Title (@content.ContentType)</h2>
+
+<!-- 1) Basic Content Info -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Code:</strong> @Model.Code</p>
+                <p><strong>Risk Level:</strong> @Model.RiskLevel</p>
+                <p><strong>Created By:</strong> @content.CreatedByNavigation?.UserName ?? content.CreatedBy</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Created At:</strong> @content.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
+                <p><strong>Times Viewed:</strong> @content.TimesViewed</p>
+                <p><strong>Content ID:</strong> @content.ContentId</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<!-- 2) Departments and Clearance -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h4>Departments & Clearance</h4>
+    </div>
+    <div class="card-body">
+        @if (content.ContentDepartments.Any())
+        {
+            <div class="row">
+                @foreach (var cd in content.ContentDepartments)
+                {
+                    <div class="col-md-4 mb-2">
+                        <div class="border p-2 rounded">
+                            <strong>@cd.Department.Name</strong><br />
+                            Clearance Level: @cd.ClearanceLevelRequired
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">No department assignments.</p>
+        }
+    </div>
+</div>
+
+<hr />
+
+<!-- 3) Content Items in DisplayOrder (Excluding Files) -->
+@if (textAndLinkItems.Any())
+{
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Content Items</h4>
+            <small class="text-muted">Displayed in order (DisplayOrder: 0, 1, 2...)</small>
+        </div>
+        <div class="card-body">
+            @foreach (var item in textAndLinkItems)
+            {
+                <div class="item-container mb-4 p-3 border rounded">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5>@item.ItemTitle</h5>
+                        <span class="badge bg-secondary">Order: @item.DisplayOrder</span>
+                    </div>
+
+                    @switch (item.ItemType)
+                    {
+                        case "Text":
+                            <div class="text-content">
+                                @Html.Raw(item.ItemValue)
+                            </div>
+                            break;
+
+                        case "Link":
+                            <div class="link-content">
+                                <i class="bi bi-link-45deg"></i>
+                                <a href="@item.ItemValue" target="_blank" class="ms-1">
+                                    @item.ItemValue
+                                </a>
+                            </div>
+                            break;
+
+                        @case "Image":
+                            <div class="image-content text-center">
+                                <div class="image-container">
+                                    <img src="/uploads/images/@item.ItemValue"
+                                         alt="@item.ItemTitle"
+                                         class="img-fluid rounded"
+                                         style="max-height: 400px; object-fit: contain;"
+                                         onerror="this.src='https://via.placeholder.com/600x400?text=Image+Not+Found'" />
+                                </div>
+                            </div>
+                            break;
+
+                        default:
+                            <div class="text-content">
+                                @item.ItemValue
+                            </div>
+                            break;
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+else if (orderedItems.Any())
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> This content only contains files (see below).
+    </div>
+}
+
+<!-- 4) Files Section (Always at the end, but sorted by DisplayOrder) -->
+@if (fileItems.Any())
+{
+    <div class="card mt-4">
+        <div class="card-header bg-light">
+            <h4><i class="bi bi-folder"></i> Files & Downloads</h4>
+            <small class="text-muted">Sorted by DisplayOrder</small>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="10%">Order</th>
+                            <th width="30%">File Name</th>
+                            <th width="50%">File Path/URL</th>
+                            <th width="20%">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in fileItems.OrderBy(i => i.DisplayOrder))
+                        {
+                            <tr>
+                                <td>@item.DisplayOrder</td>
+                                <td>
+                                    <i class="bi bi-file-earmark"></i>
+                                    <strong>@item.ItemTitle</strong>
+                                </td>
+                                <td>
+                                    <small class="text-muted">@item.ItemValue</small>
+                                </td>
+                                <td>
+                                    <a href="@(Url.Action("DownloadItem", "Item", new { id = item.ItemId }))"
+                                       class="btn btn-sm btn-primary">
+                                        <i class="bi bi-download"></i> Download
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .item-container {
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+        .item-container:hover {
+            background-color: #e9ecef;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+    .image-container {
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 5px;
+        display: inline-block;
+    }
+
+    .text-content {
+        line-height: 1.6;
+    }
+
+    .link-content a {
+        word-break: break-all;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Add image loading error handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.image-content img');
+            images.forEach(img => {
+                img.addEventListener('error', function() {
+                    this.src = 'https://via.placeholder.com/600x400?text=Image+Not+Found';
+                });
+            });
+        });
+    </script>
+}
+
+
+
+
+
+
+
+
+
+
+@*old page*@
+
+@* @model _LAB__QC_HQ.Models.KnowHowDetail
+
+@{
+    ViewData["Title"] = "Know-How Details";
+    var content = Model.Content;
 }
 
 <h2>@content.Title (@content.ContentType)</h2>
@@ -112,4 +337,4 @@ else
 {
     <p>No files.</p>
 }
-</div>
+</div> *@

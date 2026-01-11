@@ -115,12 +115,13 @@ namespace _LAB__QC_HQ.Services
                         ClearanceLevelRequired = cd.ClearanceLevelRequired
                     }).ToList(),
                 Items = knowHowDetail.Content.Items
-    .Select(i => new EditItemInput
+    .Select(i => new CreateItemInput
     {
         ItemId = i.ItemId,
         ItemType = i.ItemType,
         ItemValue = i.ItemValue,
-        ItemTitle = i.ItemTitle
+        ItemTitle = i.ItemTitle,
+        DisplayOrder = i.DisplayOrder
     }).ToList()
             };
 

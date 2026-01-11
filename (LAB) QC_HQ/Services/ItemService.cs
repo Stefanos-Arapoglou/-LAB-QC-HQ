@@ -17,44 +17,44 @@ namespace _LAB__QC_HQ.Services
             _env = env;
         }
 
+        private async Task<string> SaveUploadAsync(IFormFile fileUpload, string itemType)
+        {
+            var sanitized = Path.GetFileName(fileUpload.FileName);
+
+            // Image files stored separately
+            var folder = itemType == "Image"
+                ? Path.Combine(_env.WebRootPath, "uploads/images")
+                : Path.Combine(_env.WebRootPath, "uploads");
+
+            Directory.CreateDirectory(folder);
+
+            var path = Path.Combine(folder, sanitized);
+
+            int count = 1;
+            while (System.IO.File.Exists(path))
+            {
+                var name = Path.GetFileNameWithoutExtension(sanitized);
+                var ext = Path.GetExtension(sanitized);
+                path = Path.Combine(folder, $"{name}({count}){ext}");
+                count++;
+            }
+
+            using var stream = new FileStream(path, FileMode.Create);
+            await fileUpload.CopyToAsync(stream);
+
+            // store just filename
+            return Path.GetFileName(path);
+        }
+
         public async Task AddItemsAsync(int contentId, IEnumerable<CreateItemInput> items)
         {
             foreach (var input in items)
             {
-                string value;
+                string value = input.ItemValue ?? "";
 
-                if (input.ItemType == "File")
+                if ((input.ItemType == "File" || input.ItemType == "Image") && input.FileUpload != null)
                 {
-                    if (input.FileUpload == null)
-                        throw new InvalidOperationException("File item requires upload.");
-
-                    var originalName = Path.GetFileName(input.FileUpload.FileName);
-                    var sanitizedName = string.Concat(
-                        originalName.Split(Path.GetInvalidFileNameChars())
-                    );
-
-                    var uploads = Path.Combine(_env.WebRootPath, "uploads");
-                    Directory.CreateDirectory(uploads);
-
-                    var path = Path.Combine(uploads, sanitizedName);
-                    int count = 1;
-
-                    while (File.Exists(path))
-                    {
-                        var name = Path.GetFileNameWithoutExtension(sanitizedName);
-                        var ext = Path.GetExtension(sanitizedName);
-                        path = Path.Combine(uploads, $"{name}({count}){ext}");
-                        count++;
-                    }
-
-                    using var stream = new FileStream(path, FileMode.Create);
-                    await input.FileUpload.CopyToAsync(stream);
-
-                    value = Path.GetFileName(path);
-                }
-                else
-                {
-                    value = input.ItemValue!;
+                    value = await SaveUploadAsync(input.FileUpload, input.ItemType);
                 }
 
                 _db.Items.Add(new Item
@@ -62,7 +62,8 @@ namespace _LAB__QC_HQ.Services
                     ContentId = contentId,
                     ItemType = input.ItemType,
                     ItemTitle = input.ItemTitle,
-                    ItemValue = value
+                    ItemValue = value,
+                    DisplayOrder = input.DisplayOrder
                 });
             }
 
@@ -77,12 +78,13 @@ namespace _LAB__QC_HQ.Services
         public async Task<(byte[] data, string fileName)> GetFileAsync(int itemId)
         {
             var item = await GetItemByIdAsync(itemId);
-            if (item == null || item.ItemType != "File")
+            if (item == null || (item.ItemType != "File" && item.ItemType != "Image"))
                 throw new FileNotFoundException();
 
-            var path = Path.Combine(_env.WebRootPath, "uploads", item.ItemValue);
-            var data = await File.ReadAllBytesAsync(path);
+            var folder = item.ItemType == "Image" ? "uploads/images" : "uploads";
+            var path = Path.Combine(_env.WebRootPath, folder, item.ItemValue);
 
+            var data = await File.ReadAllBytesAsync(path);
             return (data, item.ItemValue);
         }
 
@@ -92,9 +94,11 @@ namespace _LAB__QC_HQ.Services
             if (item == null)
                 return;
 
-            if (item.ItemType == "File")
+            if (item.ItemType == "File" || item.ItemType == "Image")
             {
-                var path = Path.Combine(_env.WebRootPath, "uploads", item.ItemValue);
+                var folder = item.ItemType == "Image" ? "uploads/images" : "uploads";
+                var path = Path.Combine(_env.WebRootPath, folder, item.ItemValue);
+
                 if (File.Exists(path))
                     File.Delete(path);
             }
@@ -103,9 +107,7 @@ namespace _LAB__QC_HQ.Services
             await _db.SaveChangesAsync();
         }
 
-
-        // Updates, adds, and removes items for a given content
-        public async Task UpdateItemsAsync(int contentId, List<EditItemInput> items)
+        public async Task UpdateItemsAsync(int contentId, List<CreateItemInput> items)
         {
             var existingItems = await _db.Items
                 .Where(i => i.ContentId == contentId)
@@ -115,63 +117,31 @@ namespace _LAB__QC_HQ.Services
             {
                 if (input.ItemId > 0)
                 {
-                    // Update existing
-                    var item = existingItems.FirstOrDefault(x => x.ItemId == input.ItemId);
-                    if (item != null)
+                    // EXISTING ITEM
+                    var item = existingItems.First(x => x.ItemId == input.ItemId);
+
+                    item.ItemTitle = input.ItemTitle;
+                    item.ItemType = input.ItemType;
+                    item.DisplayOrder = input.DisplayOrder;
+
+                    if ((input.ItemType == "File" || input.ItemType == "Image") && input.FileUpload != null)
                     {
-                        item.ItemTitle = input.ItemTitle;
-                        item.ItemType = input.ItemType;
-
-                        if (input.ItemType == "File" && input.FileUpload != null)
-                        {
-                            // Save new file
-                            var uploads = Path.Combine(_env.WebRootPath, "uploads");
-                            Directory.CreateDirectory(uploads);
-
-                            var sanitizedFileName = Path.GetFileName(input.FileUpload.FileName);
-                            var path = Path.Combine(uploads, sanitizedFileName);
-                            int count = 1;
-                            while (System.IO.File.Exists(path))
-                            {
-                                var fileNameWithoutExt = Path.GetFileNameWithoutExtension(sanitizedFileName);
-                                var ext = Path.GetExtension(sanitizedFileName);
-                                path = Path.Combine(uploads, $"{fileNameWithoutExt}({count}){ext}");
-                                count++;
-                            }
-
-                            using var stream = new FileStream(path, FileMode.Create);
-                            await input.FileUpload.CopyToAsync(stream);
-                            item.ItemValue = Path.GetFileName(path);
-                        }
-                        else
-                        {
-                            item.ItemValue = input.ItemValue;
-                        }
+                        // Save new upload
+                        item.ItemValue = await SaveUploadAsync(input.FileUpload, input.ItemType);
+                    }
+                    else
+                    {
+                        item.ItemValue = input.ItemValue ?? "";
                     }
                 }
                 else
                 {
-                    // Add new
+                    // NEW ITEM
                     string value = input.ItemValue ?? "";
-                    if (input.ItemType == "File" && input.FileUpload != null)
+
+                    if ((input.ItemType == "File" || input.ItemType == "Image") && input.FileUpload != null)
                     {
-                        var uploads = Path.Combine(_env.WebRootPath, "uploads");
-                        Directory.CreateDirectory(uploads);
-
-                        var sanitizedFileName = Path.GetFileName(input.FileUpload.FileName);
-                        var path = Path.Combine(uploads, sanitizedFileName);
-                        int count = 1;
-                        while (System.IO.File.Exists(path))
-                        {
-                            var fileNameWithoutExt = Path.GetFileNameWithoutExtension(sanitizedFileName);
-                            var ext = Path.GetExtension(sanitizedFileName);
-                            path = Path.Combine(uploads, $"{fileNameWithoutExt}({count}){ext}");
-                            count++;
-                        }
-
-                        using var stream = new FileStream(path, FileMode.Create);
-                        await input.FileUpload.CopyToAsync(stream);
-                        value = Path.GetFileName(path);
+                        value = await SaveUploadAsync(input.FileUpload, input.ItemType);
                     }
 
                     _db.Items.Add(new Item
@@ -179,21 +149,20 @@ namespace _LAB__QC_HQ.Services
                         ContentId = contentId,
                         ItemTitle = input.ItemTitle,
                         ItemType = input.ItemType,
-                        ItemValue = value
+                        ItemValue = value,
+                        DisplayOrder = input.DisplayOrder
                     });
                 }
             }
 
-            // Remove deleted items
+            // Delete removed items
             var incomingIds = items.Where(i => i.ItemId > 0).Select(i => i.ItemId).ToList();
-            var toDelete = existingItems.Where(x => !incomingIds.Contains(x.ItemId)).ToList();
-            if (toDelete.Any())
-            {
-                _db.Items.RemoveRange(toDelete);
-            }
+            var toDelete = existingItems.Where(x => !incomingIds.Contains(x.ItemId));
+
+            foreach (var item in toDelete)
+                await DeleteItemAsync(item.ItemId); // ensures uploaded file is removed
 
             await _db.SaveChangesAsync();
         }
-
     }
 }

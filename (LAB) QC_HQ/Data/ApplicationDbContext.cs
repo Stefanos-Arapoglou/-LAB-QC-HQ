@@ -161,6 +161,8 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>
                 .HasMaxLength(50)
                 .HasColumnName("item_type");
             entity.Property(e => e.ItemValue).HasColumnName("item_value");
+            //i added this for the ordering of items
+            entity.Property(e => e.DisplayOrder).HasColumnName("display_order");
 
             entity.HasOne(d => d.Content).WithMany(p => p.Items)
                 .HasForeignKey(d => d.ContentId)

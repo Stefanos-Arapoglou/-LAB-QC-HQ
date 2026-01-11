@@ -2,17 +2,10 @@
 
 namespace _LAB__QC_HQ.Models.DTO
 {
-    public class CreateItemInput
+    public class CreateItemInput: ItemInputBase
     {
-        [Required]
-        public string ItemType { get; set; } = "Text"; // Text / Link / File
 
-        public string ItemTitle { get; set; } = null!; // ✅ NEW
-
-        [StringLength(5000)]
-        public string? ItemValue { get; set; }
-
-        // For files
-        public IFormFile? FileUpload { get; set; }
+        // ⭐ Drag/drop assigns this dynamically in UI
+        public int DisplayOrder { get; set; }
     }
 }

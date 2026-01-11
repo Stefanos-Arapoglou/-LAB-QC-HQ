@@ -17,5 +17,7 @@ public partial class Item
 
     public string ItemValue { get; set; } = null!;
 
+    public int DisplayOrder { get; set; }
+
     public virtual Content Content { get; set; } = null!;
 }

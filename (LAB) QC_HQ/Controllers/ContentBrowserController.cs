@@ -22,8 +22,7 @@ namespace _LAB__QC_HQ.Controllers
             _userManager = userManager;
         }
 
-        protected string CurrentUserId =>
-_userManager.GetUserId(User)!;
+        protected string CurrentUserId => _userManager.GetUserId(User)!;
 
         // GET: /Content
         public IActionResult Index()
@@ -40,12 +39,36 @@ _userManager.GetUserId(User)!;
             else
             {
                 var content = _contentService
-    .GetBrowsableContent()
-    .Where(c => _authService.CanView(c.ContentId, CurrentUserId))
-    .ToList();
+                    .GetBrowsableContent()
+                    .Where(c => _authService.CanView(c.ContentId, CurrentUserId))
+                    .ToList();
 
                 return View(content);
             }
+        }
+
+
+
+        // URL: /ContentBrowse/Edit/5
+        public async Task<IActionResult> Edit(int id)
+        {
+            // Check permissions
+            if (!_authService.CanView(id, CurrentUserId))
+                return Forbid();
+
+            // Get content type
+            var contentType = await _contentService.GetContentTypeAsync(id);
+
+            // Route to appropriate controller
+            return contentType switch
+            {
+                ContentType.KnowHow => RedirectToAction("Edit", "KnowHow", new { id }),
+                ContentType.Educational => RedirectToAction("Edit", "Educational", new { id }),
+                ContentType.Announcement => RedirectToAction("Edit", "Announcement", new { id }),
+                ContentType.File => RedirectToAction("Edit", "File", new { id }),
+                // "Item" and "Document" don't exist in your enum - remove them!
+                _ => NotFound($"Content type not found for ID: {id}")
+            };
         }
 
         // URL: /ContentBrowse/Details/5
@@ -69,8 +92,6 @@ _userManager.GetUserId(User)!;
                 _ => NotFound($"Content type not found for ID: {id}")
             };
         }
-
-
 
 
 

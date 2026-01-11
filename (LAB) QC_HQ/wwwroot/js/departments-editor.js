@@ -27,6 +27,39 @@
         });
     }
 
+    // Add X buttons to EXISTING departments (for Edit mode)
+    function addRemoveButtonsToExistingDepartments() {
+        const existingEntries = container.querySelectorAll(".department-entry");
+        existingEntries.forEach((entry, index) => {
+            // Check if button already exists
+            if (!entry.querySelector(".remove-department")) {
+                // Create X button
+                const removeBtn = document.createElement("button");
+                removeBtn.type = "button";
+                removeBtn.className = "btn btn-outline-danger btn-sm ms-2 remove-department";
+                removeBtn.textContent = "✖";
+                removeBtn.setAttribute("data-index", index);
+
+                // Add hidden field for marking removal
+                const hiddenField = document.createElement("input");
+                hiddenField.type = "hidden";
+                hiddenField.name = `Departments[${index}].__MarkedForRemoval`;
+                hiddenField.id = `Departments[${index}]__MarkedForRemoval`;
+                hiddenField.value = "false";
+
+                // Add hidden field to entry
+                entry.appendChild(hiddenField);
+                // Add X button to entry
+                entry.appendChild(removeBtn);
+            }
+        });
+    }
+
+    // Initialize remove buttons for existing departments
+    addRemoveButtonsToExistingDepartments();
+
+
+
     addBtn?.addEventListener("click", function () {
 
         const template = `
@@ -39,10 +72,10 @@
 
                 <select name="Departments[${depIndex}].ClearanceLevelRequired"
                         class="form-select w-25">
-                    <option value="0">None</option>
-                    <option value="1">Viewer</option>
-                    <option value="2">Contributor</option>
-                    <option value="3">Manager</option>
+                    <option value="0">0 - No Access</option>
+                    <option value="1">1 - Basic Access</option>
+                    <option value="2">2 - Advanced Access</option>
+                    <option value="3">3 - Full Access</option>
                 </select>
 
                 <button type="button"
