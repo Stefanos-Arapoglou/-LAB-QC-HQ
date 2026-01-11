@@ -10,8 +10,9 @@
     <link rel="stylesheet" href="~/_LAB__QC_HQ.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <header class="sticky-top bg-white border-bottom">
+        <nav class="navbar navbar-expand-sm navbar-light box-shadow">
+
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">QC HQ</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -64,7 +65,7 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container pt-4">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
@@ -81,3 +82,4 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+

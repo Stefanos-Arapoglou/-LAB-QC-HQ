@@ -14,6 +14,7 @@ namespace _LAB__QC_HQ.Models.ViewModels
         [StringLength(200)]
         public string Title { get; set; } = null!;
 
+
         [MinLength(1, ErrorMessage = "At least one department must be selected.")]
         public List<DepartmentClearanceInput> Departments { get; set; } = new();
     }

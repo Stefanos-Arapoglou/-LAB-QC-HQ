@@ -10,6 +10,6 @@ namespace _LAB__QC_HQ.Interfaces
         Task<(byte[] data, string fileName)> GetFileAsync(int itemId);
         Task DeleteItemAsync(int itemId);
 
-        Task UpdateItemsAsync(int contentId, List<EditItemInput> items);
+        Task UpdateItemsAsync(int contentId, List<CreateItemInput> items);
     }
 }

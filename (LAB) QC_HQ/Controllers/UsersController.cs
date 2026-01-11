@@ -28,7 +28,6 @@ namespace _LAB__QC_HQ.Controllers
             var users = await _context.Users
                 .Include(u => u.UserDepartments)
                 .ThenInclude(ud => ud.Department)
-                .Where(u => u.IsActive)
                 .ToListAsync();
             return View(users);
         }

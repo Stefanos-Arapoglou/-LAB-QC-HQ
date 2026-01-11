@@ -11,7 +11,7 @@ namespace _LAB__QC_HQ.Models.ViewModels
         [Required]
         public byte RiskLevel { get; set; }
 
-        [MinLength(1)]
-        public List<EditItemInput> Items { get; set; } = new(); // ✅ Now uses EditItemInput
+        /*[MinLength(1)]*/
+        public List<CreateItemInput> Items { get; set; } = new();
     }
 }

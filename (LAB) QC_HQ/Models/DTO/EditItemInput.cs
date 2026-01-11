@@ -2,7 +2,7 @@
 
 namespace _LAB__QC_HQ.Models.DTO
 {
-    public class EditItemInput
+    public class EditItemInput: ItemInputBase
     {
         public EditItemInput() { }
         public int ItemId { get; set; } // ✅ Needed for updates
@@ -18,5 +18,8 @@ namespace _LAB__QC_HQ.Models.DTO
 
         // For file uploads
         public IFormFile? FileUpload { get; set; }
+
+        // ⭐ Needed so reordered list posts back correctly
+        public int DisplayOrder { get; set; }
     }
 }

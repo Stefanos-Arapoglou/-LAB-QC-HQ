@@ -95,6 +95,88 @@ public class RolesController : Controller
 
         return View(users);
     }
+
+    // GET: /Roles/Delete
+    [HttpGet]
+    public async Task<IActionResult> Delete(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+        {
+            return NotFound();
+        }
+
+        var role = await _roleManager.FindByIdAsync(id);
+        if (role == null)
+        {
+            return NotFound();
+        }
+
+        // Optional: Check if role has users before allowing deletion
+        var usersInRole = await _userManager.GetUsersInRoleAsync(role.Name);
+        if (usersInRole.Any())
+        {
+            ViewBag.ErrorMessage = $"Cannot delete role '{role.Name}' because it has {usersInRole.Count} user(s) assigned. Remove users from this role first.";
+            return View("Error");
+        }
+
+        return View(role);
+    }
+
+    // POST: /Roles/Delete
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+        {
+            return NotFound();
+        }
+
+        var role = await _roleManager.FindByIdAsync(id);
+        if (role == null)
+        {
+            return NotFound();
+        }
+
+        // Check if it's a system role that shouldn't be deleted
+        if (IsSystemRole(role.Name))
+        {
+            TempData["ErrorMessage"] = $"Cannot delete system role: {role.Name}";
+            return RedirectToAction(nameof(Index));
+        }
+
+        try
+        {
+            var result = await _roleManager.DeleteAsync(role);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = $"Role '{role.Name}' deleted successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Handle errors
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return View(role);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            TempData["ErrorMessage"] = $"Error deleting role: {ex.Message}";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    // Optional helper method to protect system roles
+    private bool IsSystemRole(string roleName)
+    {
+        var systemRoles = new[] { "Administrator", "SuperAdmin", "SystemAdmin", "User", "Admin" };
+        return systemRoles.Contains(roleName, StringComparer.OrdinalIgnoreCase);
+    }
+
 }
 
 public class UserRoleViewModel
