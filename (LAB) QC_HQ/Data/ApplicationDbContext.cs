@@ -17,17 +17,21 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
     }
 
-/*    public virtual DbSet<AspNetRole> AspNetRoles { get; set; }
+    //The following DbSets are commented out since they will be mapped by the builder from Application user
+    //ITS WRONG!! Professor SAID TO AVOID DOING THIS!! keep Aspnet and ApplicationUser separate!!
+    //not sure how to fix it now though..
 
-    public virtual DbSet<AspNetRoleClaim> AspNetRoleClaims { get; set; }
+    /*  public virtual DbSet<AspNetRole> AspNetRoles { get; set; }
 
-    public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
+        public virtual DbSet<AspNetRoleClaim> AspNetRoleClaims { get; set; }
 
-    public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; }
+        public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
 
-    public virtual DbSet<AspNetUserLogin> AspNetUserLogins { get; set; }
+        public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; }
 
-    public virtual DbSet<AspNetUserToken> AspNetUserTokens { get; set; }*/
+        public virtual DbSet<AspNetUserLogin> AspNetUserLogins { get; set; }
+
+        public virtual DbSet<AspNetUserToken> AspNetUserTokens { get; set; }  */
 
     public virtual DbSet<Content> Contents { get; set; }
 
@@ -250,6 +254,9 @@ public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<ApplicationUser>(entity =>
         {
             // Map to existing AspNetUsers table
+            // THIS IS THE PART THE PROFESSOR SAID TO AVOID!! 
+            // Future me: Keep AspNetUsers and ApplicaitonUsers separate!
+            // Now not sure how to fix issue without breaking Identity functionality..
             entity.ToTable("AspNetUsers");
 
             // Configure your custom properties

@@ -1,10 +1,28 @@
-﻿
+﻿/* NOTES 
+ 
+This controller manages user roles within the application, allowing administration to create roles, assign roles to users, view users and their roles, and delete roles. 
+It ensures that only users with the "Admin" role can access these functionalities.
+It also provides an overall view of all users and their assigned role
+Everything goes through Microsoft Identity RoleManager and UserManager!
+
+SUMMARY:
+    1) HANDLES LISTING of all roles
+    2) HANDLES CREATION of new roles
+    3) HANDLES ASSIGNMENT of roles to users
+    4) HANDLES VIEWING of all users and their roles
+    5) HANDLES DELETION of roles (with checks to prevent deletion of system roles or roles with assigned users)
+  
+ */
+
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using _LAB__QC_HQ.Models;
+using _LAB__QC_HQ.Models.ViewModels;
 
-/*[Authorize(Roles = "Admin")] */
+
+[Authorize(Roles = "Admin")]
 public class RolesController : Controller
 {
     private readonly RoleManager<IdentityRole> _roleManager;
@@ -18,20 +36,28 @@ public class RolesController : Controller
         _userManager = userManager;
     }
 
+
     // GET: /Roles
+    // Lists all roles
     public IActionResult Index()
     {
         var roles = _roleManager.Roles;
         return View(roles);
     }
 
+
+
     // GET: /Roles/Create
+    // Directs to the role creation view
     public IActionResult Create()
     {
         return View();
     }
 
+
+
     // POST: /Roles/Create
+    // creates a new role
     [HttpPost]
     public async Task<IActionResult> Create(string roleName)
     {
@@ -46,7 +72,10 @@ public class RolesController : Controller
         return View();
     }
 
+
+
     // GET: /Roles/Assign
+    // Directs to the role assignment view
     public async Task<IActionResult> Assign()
     {
         var users = _userManager.Users.ToList();
@@ -58,10 +87,14 @@ public class RolesController : Controller
         return View();
     }
 
+
+
     // POST: /Roles/Assign
+    // Assigns a role to a user
     [HttpPost]
     public async Task<IActionResult> Assign(string userId, string roleName)
     {
+        //first we get the user by their ID
         var user = await _userManager.FindByIdAsync(userId);
         if (user != null)
         {
@@ -75,7 +108,10 @@ public class RolesController : Controller
         return View();
     }
 
+
+
     // GET: /Roles/Users
+    // An overview of all users and their roles
     public async Task<IActionResult> Users()
     {
         var users = new List<UserRoleViewModel>();
@@ -96,7 +132,10 @@ public class RolesController : Controller
         return View(users);
     }
 
+
+
     // GET: /Roles/Delete
+    // Directs to the role deletion confirmation view
     [HttpGet]
     public async Task<IActionResult> Delete(string id)
     {
@@ -111,7 +150,7 @@ public class RolesController : Controller
             return NotFound();
         }
 
-        // Optional: Check if role has users before allowing deletion
+        //Check if role has users before allowing deletion
         var usersInRole = await _userManager.GetUsersInRoleAsync(role.Name);
         if (usersInRole.Any())
         {
@@ -122,7 +161,10 @@ public class RolesController : Controller
         return View(role);
     }
 
+
+
     // POST: /Roles/Delete
+    // Deletes the role after confirmation
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(string id)
@@ -170,7 +212,9 @@ public class RolesController : Controller
         }
     }
 
-    // Optional helper method to protect system roles
+
+
+    // Helper method to protect system roles
     private bool IsSystemRole(string roleName)
     {
         var systemRoles = new[] { "Administrator", "SuperAdmin", "SystemAdmin", "User", "Admin" };
@@ -179,11 +223,3 @@ public class RolesController : Controller
 
 }
 
-public class UserRoleViewModel
-{
-    public string UserId { get; set; }
-    public string Email { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public List<string> Roles { get; set; } = new List<string>();
-}

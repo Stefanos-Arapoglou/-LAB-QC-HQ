@@ -4,7 +4,7 @@ This Controller was necessary, to handle the TOTALITY of content, since the Cont
 class that cannot be instantiated on its own. This controller serves as a router to the appropriate Controllers,
 and also handles listing, activation, and deactivation for the TOTALITY of content, regardless of type.
 
-In Summary, Does the following:
+SUMMARY:
     1) HANDLES BROWSING of ALL content types
     2) REROUTES to appropriate Edit and Details actions based on content type
     3) HANDLES DELETION of content
