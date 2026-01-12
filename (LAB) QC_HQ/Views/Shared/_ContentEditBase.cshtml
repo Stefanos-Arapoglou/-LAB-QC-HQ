@@ -9,34 +9,3 @@
 
 <hr />
 
-@* <h5>Departments & Clearance</h5>
-
-<div id="departments-container">
-    @for (int i = 0; i < Model.Departments.Count; i++)
-    {
-        <div class="department-entry d-flex mb-2">
-            <select asp-for="Departments[i].DepartmentId" class="form-select w-auto me-2" style="flex: 2;">
-                <option value="">-- Select Department --</option>
-                @foreach (var dep in ViewBag.Departments)
-                {
-                    <option value="@dep.DepartmentId">@dep.Name</option>
-                }
-            </select>
-
-            <select asp-for="Departments[i].ClearanceLevelRequired"
-                    class="form-select w-auto" style="flex: 1;">
-                <option value="0">0 - No Access</option>
-                <option value="1">1 - Basic Access</option>
-                <option value="2">2 - Advanced Access</option>
-                <option value="3">3 - Full Access</option>
-            </select>
-        </div>
-    }
-</div>
-
-<button type="button"
-        class="btn btn-secondary"
-        id="add-department">
-    Add Department
-</button> *@
-<hr />

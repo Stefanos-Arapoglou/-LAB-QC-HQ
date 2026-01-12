@@ -1,4 +1,14 @@
-﻿using _LAB__QC_HQ.Interfaces;
+﻿/* NOTES 
+
+As of now, this controller is not being used! It could be completely commented out.
+But in the future, in case of specific Item-related actions, that are NOT connected to Content directly, will go through here
+
+Non Content binded item creation, updating, binding and other actions will be added here in the future
+
+ */
+
+
+using _LAB__QC_HQ.Interfaces;
 using _LAB__QC_HQ.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +27,8 @@ namespace _LAB__QC_HQ.Controllers
             _itemService = itemService;
         }
 
+        // GET: /Item/DownloadItem/5
+        // Downloads the file associated with the item
         public async Task<IActionResult> DownloadItem(int id)
         {
             try
@@ -35,6 +47,9 @@ namespace _LAB__QC_HQ.Controllers
         }
 
 
+
+        // POST: /Item/UpdateItems/5
+        // Updates multiple items associated with a content (WILL BE REMOVED)
         [HttpPost]
         public async Task<IActionResult> UpdateItems(int contentId, List<CreateItemInput> items)
         {

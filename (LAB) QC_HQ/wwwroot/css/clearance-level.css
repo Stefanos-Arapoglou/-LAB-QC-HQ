@@ -1,0 +1,141 @@
+﻿/*NOTES 
+    I added this css file to implement with a TagHelper, to every view that has clearance level.
+    I mostly did it to see how TagHelpers work and if they are useful in general.
+    After a few problems with namespaces i made it work. Key point: the taghelper uses the <Assembly></Assembly> name, and 
+    if this does not exists, takes the file name of the .csproj !! 
+*/
+
+
+/* Container styling for clearance levels */
+.clearance-level-0 {
+    background-color: #f8f9fa !important;
+    border-left: 4px solid #6c757d !important;
+}
+
+.clearance-level-1 {
+    background-color: #e8f5e9 !important;
+    border-left: 4px solid #28a745 !important;
+}
+
+.clearance-level-2 {
+    background-color: #fff3cd !important;
+    border-left: 4px solid #ffc107 !important;
+}
+
+.clearance-level-3 {
+    background-color: #f8d7da !important;
+    border-left: 4px solid #dc3545 !important;
+}
+
+/* Hover effects for containers */
+.clearance-level-0:hover {
+    background-color: #e9ecef !important;
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.clearance-level-1:hover {
+    background-color: #d4edda !important;
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.clearance-level-2:hover {
+    background-color: #ffeaa7 !important;
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.clearance-level-3:hover {
+    background-color: #f5c6cb !important;
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Optional: Make text color match theme */
+.clearance-level-0 strong {
+    color: #495057;
+}
+
+.clearance-level-1 strong {
+    color: #155724;
+}
+
+.clearance-level-2 strong {
+    color: #856404;
+}
+
+.clearance-level-3 strong {
+    color: #721c24;
+}
+
+/* Badge styling with SOFT COLORS */
+.clearance-level-0.badge {
+    background-color: #f5f5f5 !important;
+    color: #5d5d5d !important;
+    border: 1px solid #d0d0d0 !important;
+}
+
+.clearance-level-1.badge {
+    background-color: #e8f5e9 !important;
+    color: #1a6b3c !important;
+    border: 1px solid #a5d6a7 !important;
+}
+
+.clearance-level-2.badge {
+    background-color: #fff8e1 !important;
+    color: #8d6e1f !important;
+    border: 1px solid #ffd54f !important;
+}
+
+.clearance-level-3.badge {
+    background-color: #ffebee !important;
+    color: #b71c1c !important;
+    border: 1px solid #ef9a9a !important;
+}
+
+/* Hover effects for badges */
+.clearance-level-0.badge:hover {
+    background-color: #eeeeee !important;
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
+.clearance-level-1.badge:hover {
+    background-color: #dcedc8 !important;
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
+.clearance-level-2.badge:hover {
+    background-color: #fff3cd !important;
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
+.clearance-level-3.badge:hover {
+    background-color: #ffcdd2 !important;
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
+/* Optional: Make text color match theme for containers */
+.clearance-level-0 strong {
+    color: #495057;
+}
+
+.clearance-level-1 strong {
+    color: #155724;
+}
+
+.clearance-level-2 strong {
+    color: #856404;
+}
+
+.clearance-level-3 strong {
+    color: #721c24;
+}

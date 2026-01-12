@@ -21,6 +21,10 @@ namespace _LAB__QC_HQ.Interfaces
         IEnumerable<Content> GetAllContentIncludingInactive();
         IEnumerable<Department> GetAllDepartments();
 
+        IEnumerable<Content> GetTypeContentIncludingInactive(ContentType contentType);
+
+        IEnumerable<Content> GetAllTypeContent(ContentType contentType);
+
         Task<ContentType> GetContentTypeAsync(int contentId);
 
         Task<bool> DeleteContentAsync(int contentId);

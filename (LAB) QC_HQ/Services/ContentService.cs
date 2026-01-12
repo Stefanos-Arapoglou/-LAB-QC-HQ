@@ -81,6 +81,26 @@ namespace _LAB__QC_HQ.Services
             return _db.Contents.Where(c => c.IsActive).ToList();
         }
 
+        public IEnumerable<Content> GetTypeContentIncludingInactive(ContentType contentType)
+        {
+            return _db.Contents
+                .Where(c => c.ContentType == contentType.ToDbString())
+                .Include(c => c.Items)
+                .Include(c => c.ContentDepartments)
+                    .ThenInclude(cd => cd.Department)
+                .Include(c => c.CreatedByNavigation)
+                .ToList();
+        }
+
+        public IEnumerable<Content> GetAllTypeContent(ContentType contentType)
+        {
+            return _db.Contents
+                .Where(c => c.IsActive)
+                .Where(c => c.ContentType == contentType.ToDbString())
+                .ToList();
+        }
+
+
         public Content? GetContentById(int contentId)
         {
             return _db.Contents.FirstOrDefault(c => c.ContentId == contentId && c.IsActive);

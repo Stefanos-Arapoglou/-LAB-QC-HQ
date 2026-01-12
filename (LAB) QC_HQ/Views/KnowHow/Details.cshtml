@@ -19,7 +19,7 @@
             <div class="col-md-6">
                 <p><strong>Code:</strong> @Model.Code</p>
                 <p><strong>Risk Level:</strong> @Model.RiskLevel</p>
-                <p><strong>Created By:</strong> @content.CreatedByNavigation?.UserName ?? content.CreatedBy</p>
+                <p><strong>Created By:</strong> @content.CreatedByNavigation?.UserName</p>
             </div>
             <div class="col-md-6">
                 <p><strong>Created At:</strong> @content.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
@@ -43,8 +43,9 @@
             <div class="row">
                 @foreach (var cd in content.ContentDepartments)
                 {
+
                     <div class="col-md-4 mb-2">
-                        <div class="border p-2 rounded">
+                         <div class="border p-2 rounded clearance-level-@cd.ClearanceLevelRequired">
                             <strong>@cd.Department.Name</strong><br />
                             Clearance Level: @cd.ClearanceLevelRequired
                         </div>
@@ -66,8 +67,8 @@
 {
     <div class="card mb-4">
         <div class="card-header">
-            <h4>Content Items</h4>
-            <small class="text-muted">Displayed in order (DisplayOrder: 0, 1, 2...)</small>
+            <h4>Content</h4>
+            <small class="text-muted">@content.Items.Count() items</small>
         </div>
         <div class="card-body">
             @foreach (var item in textAndLinkItems)
@@ -75,7 +76,7 @@
                 <div class="item-container mb-4 p-3 border rounded">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h5>@item.ItemTitle</h5>
-                        <span class="badge bg-secondary">Order: @item.DisplayOrder</span>
+                        <span class="badge bg-secondary">Item: @(item.DisplayOrder+1)</span>
                     </div>
 
                     @switch (item.ItemType)
@@ -131,24 +132,22 @@ else if (orderedItems.Any())
     <div class="card mt-4">
         <div class="card-header bg-light">
             <h4><i class="bi bi-folder"></i> Files & Downloads</h4>
-            <small class="text-muted">Sorted by DisplayOrder</small>
+            <small class="text-muted"></small>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th width="10%">Order</th>
-                            <th width="30%">File Name</th>
-                            <th width="50%">File Path/URL</th>
-                            <th width="20%">Action</th>
+                            <th width="30%">Title</th>
+                            <th width="60%">File Name</th>
+                            <th width="10%">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var item in fileItems.OrderBy(i => i.DisplayOrder))
                         {
                             <tr>
-                                <td>@item.DisplayOrder</td>
                                 <td>
                                     <i class="bi bi-file-earmark"></i>
                                     <strong>@item.ItemTitle</strong>
@@ -212,129 +211,3 @@ else if (orderedItems.Any())
     </script>
 }
 
-
-
-
-
-
-
-
-
-
-@*old page*@
-
-@* @model _LAB__QC_HQ.Models.KnowHowDetail
-
-@{
-    ViewData["Title"] = "Know-How Details";
-    var content = Model.Content;
-}
-
-<h2>@content.Title (@content.ContentType)</h2>
-
-<!-- 1) Basic Content Info -->
-<div class="mb-3">
-    <strong>Code:</strong> @Model.Code <br />
-    <strong>Risk Level:</strong> @Model.RiskLevel <br />
-    <strong>Created By:</strong> @content.CreatedByNavigation?.UserName ?? content.CreatedBy <br />
-    <strong>Created At:</strong> @content.CreatedAt.ToString("yyyy-MM-dd HH:mm") <br />
-    <strong>Times Viewed:</strong> @content.TimesViewed
-</div>
-
-<hr />
-
-<!-- 2) Departments and Clearance -->
-<h4>Departments & Clearance</h4>
-@if (content.ContentDepartments.Any())
-{
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Department</th>
-                <th>Clearance Required</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var cd in content.ContentDepartments)
-            {
-                <tr>
-                    <td>@cd.Department.Name</td>
-                    <td>@cd.ClearanceLevelRequired</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <p>No department assignments.</p>
-}
-
-<hr />
-
-<!-- 3) Text Items -->
-<h4>Text Items</h4>
-@if (content.Items.Any(i => i.ItemType == "Text"))
-{
-    <ul>
-        @foreach (var item in content.Items.Where(i => i.ItemType == "Text"))
-        {
-            <li>@item.ItemTitle</li>
-            @item.ItemValue
-            <br><br />
-        }
-    </ul>
-}
-else
-{
-    <p>No text items.</p>
-}
-
-<hr />
-
-<!-- 4) Link Items -->
-<h4>Links</h4>
-@if (content.Items.Any(i => i.ItemType == "Link"))
-{
-    <ul>
-        @foreach (var item in content.Items.Where(i => i.ItemType == "Link"))
-        {
-            <li>@item.ItemTitle: </li>
-            <a href="@item.ItemValue" target="_blank">@item.ItemValue</a>
-            <br /><Br />
-
-        }
-    </ul>
-}
-else
-{
-    <p>No links.</p>
-}
-
-<hr />
-
-<!-- 5) Files / Other Items -->
-<h4>Files / Downloads</h4>
-@if (content.Items.Any(i => i.ItemType == "File"))
-{
-    <ul>
-        @foreach (var item in Model.Content.Items)
-        {
-            @if (item.ItemType == "File")
-            {
-                <li>@item.ItemTitle: </li>
-                <a href="@(Url.Action("DownloadItem", "Item", new { id = item.ItemId }))">
-                    @item.ItemValue
-                </a>
-                <br />
-                <br />
-            }
-
-        }
-    </ul>
-}
-else
-{
-    <p>No files.</p>
-}
-</div> *@
