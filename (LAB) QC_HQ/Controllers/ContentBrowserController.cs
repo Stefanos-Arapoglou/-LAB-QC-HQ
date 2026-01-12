@@ -1,4 +1,18 @@
-﻿using _LAB__QC_HQ.Interfaces;
+﻿/*NOTES
+ * 
+This Controller was necessary, to handle the TOTALITY of content, since the ContentController is an abstract
+class that cannot be instantiated on its own. This controller serves as a router to the appropriate Controllers,
+and also handles listing, activation, and deactivation for the TOTALITY of content, regardless of type.
+
+In Summary, Does the following:
+    1) HANDLES BROWSING of ALL content types
+    2) REROUTES to appropriate Edit and Details actions based on content type
+    3) HANDLES DELETION of content
+    4) HANDLES ACTIVATION/DEACTIVATION of content
+
+ */
+
+using _LAB__QC_HQ.Interfaces;
 using _LAB__QC_HQ.Models;
 using _LAB__QC_HQ.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -22,13 +36,19 @@ namespace _LAB__QC_HQ.Controllers
             _userManager = userManager;
         }
 
+        // Helper to get the current user's ID, used mainly for perimssioning checks
         protected string CurrentUserId => _userManager.GetUserId(User)!;
 
+
+
         // GET: /Content
+        // Lists all content, with different views for Admins and regular users
         public IActionResult Index()
         {
             if (User.IsInRole("Admin"))
             {
+                //Only Admins can see inactive content! 
+                //Also has permissioning check, admins may not view all content in future (?)
                 var content = _contentService
                     .GetAllContentIncludingInactive()
                     .Where(c => _authService.CanView(c.ContentId, CurrentUserId))
@@ -38,6 +58,7 @@ namespace _LAB__QC_HQ.Controllers
             }
             else
             {
+                //Normal users only see active content they have permission to view
                 var content = _contentService
                     .GetBrowsableContent()
                     .Where(c => _authService.CanView(c.ContentId, CurrentUserId))
@@ -50,6 +71,7 @@ namespace _LAB__QC_HQ.Controllers
 
 
         // URL: /ContentBrowse/Edit/5
+        // Reroutes to appropriate Edit action based on content type
         public async Task<IActionResult> Edit(int id)
         {
             // Check permissions
@@ -71,7 +93,10 @@ namespace _LAB__QC_HQ.Controllers
             };
         }
 
+
+
         // URL: /ContentBrowse/Details/5
+        // Reroutes to appropriate Details action based on content type
         public async Task<IActionResult> Details(int id)
         {
             // Check permissions
@@ -95,7 +120,8 @@ namespace _LAB__QC_HQ.Controllers
 
 
 
-
+        // POST: /ContentBrowse/Delete/5
+        // Deletes content after checking permissions
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -118,6 +144,10 @@ namespace _LAB__QC_HQ.Controllers
             }
         }
 
+
+
+        // POST: /ContentBrowse/Activate/5
+        // Activates content (Admin only)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Activate(int id)
@@ -129,6 +159,10 @@ namespace _LAB__QC_HQ.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+
+        // POST: /ContentBrowse/Deactivate/5
+        // Deactivates content (Admin only)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Deactivate(int id)

@@ -62,7 +62,7 @@ namespace _LAB__QC_HQ.Services
 
         public async Task<KnowHowDetail?> GetKnowHowDetailAsync(int contentId)
         {
-            return await _db.KnowHowDetails
+            var knowHow = await _db.KnowHowDetails
                 .Include(k => k.Content)
                     .ThenInclude(c => c.ContentDepartments)
                         .ThenInclude(cd => cd.Department)
@@ -71,6 +71,16 @@ namespace _LAB__QC_HQ.Services
                 .Include(k => k.Content)
                     .ThenInclude(c => c.CreatedByNavigation)
                 .FirstOrDefaultAsync(k => k.ContentId == contentId && k.IsActive);
+
+            if (knowHow?.Content?.Items != null)
+            {
+                // Order items by DisplayOrder
+                knowHow.Content.Items = knowHow.Content.Items
+                    .OrderBy(i => i.DisplayOrder)
+                    .ToList();
+            }
+
+            return knowHow;
         }
 
         public async Task UpdateKnowHowAsync(int contentId, EditKnowHowViewModel model)
@@ -115,14 +125,15 @@ namespace _LAB__QC_HQ.Services
                         ClearanceLevelRequired = cd.ClearanceLevelRequired
                     }).ToList(),
                 Items = knowHowDetail.Content.Items
-    .Select(i => new CreateItemInput
-    {
-        ItemId = i.ItemId,
-        ItemType = i.ItemType,
-        ItemValue = i.ItemValue,
-        ItemTitle = i.ItemTitle,
-        DisplayOrder = i.DisplayOrder
-    }).ToList()
+                    .OrderBy(i => i.DisplayOrder)  // <-- ADD THIS LINE!
+                    .Select(i => new CreateItemInput
+                    {
+                        ItemId = i.ItemId,
+                        ItemType = i.ItemType,
+                        ItemValue = i.ItemValue,
+                        ItemTitle = i.ItemTitle,
+                        DisplayOrder = i.DisplayOrder
+                    }).ToList()
             };
 
             return model;

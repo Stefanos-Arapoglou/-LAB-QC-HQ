@@ -32,7 +32,7 @@
                 <td>
                     @foreach (var dept in user.UserDepartments)
                     {
-                        <span class="badge bg-info">@dept.Department.Name (L: @dept.ClearanceLevel)</span>
+                        <span class="badge bg-info badge clearance-level-@dept.ClearanceLevel">@dept.Department.Name (L: @dept.ClearanceLevel)</span>
                     }
                 </td>
                 <td>

@@ -1,10 +1,22 @@
-﻿document.addEventListener("DOMContentLoaded", function () {
+﻿/*NOTES
+    This JS lines are used to manage Departments and clearance level, when creating or editing Content. 
+    It allows dynamic addition and removal of department entries, ensuring no duplicate departments are selected, etc
+    
+    MAIN USAGE: Views/Shared/_DepartmentsEditor.cshtml
+    SEEN IN: All edit and create views that use Departments Editor partial view.
+
+*/
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
 
     let depIndex = document.querySelectorAll(".department-entry").length;
 
     const container = document.getElementById("departments-container");
     const addBtn = document.getElementById("add-department");
 
+    // Update Department select options to prevent duplicates
     function updateDepartmentOptions() {
         const selects = container.querySelectorAll(
             'select[name$=".DepartmentId"]'
@@ -27,7 +39,7 @@
         });
     }
 
-    // Add X buttons to EXISTING departments (for Edit mode)
+    // to Add X buttons to EXISTING departments (for Edit mode)
     function addRemoveButtonsToExistingDepartments() {
         const existingEntries = container.querySelectorAll(".department-entry");
         existingEntries.forEach((entry, index) => {
@@ -58,8 +70,7 @@
     // Initialize remove buttons for existing departments
     addRemoveButtonsToExistingDepartments();
 
-
-
+    // Add new department entry
     addBtn?.addEventListener("click", function () {
 
         const template = `
@@ -91,6 +102,7 @@
         updateDepartmentOptions(); // 🔥 REQUIRED
     });
 
+    // Remove department entry
     document.addEventListener("click", function (e) {
         if (e.target.classList.contains("remove-department")) {
             e.target.closest(".department-entry").remove();
@@ -98,6 +110,7 @@
         }
     });
 
+    // Update options on change
     document.addEventListener("change", function (e) {
         if (e.target.name?.includes("DepartmentId")) {
             updateDepartmentOptions();

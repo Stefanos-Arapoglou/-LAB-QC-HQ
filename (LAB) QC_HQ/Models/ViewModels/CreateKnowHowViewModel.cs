@@ -19,8 +19,6 @@ namespace _LAB__QC_HQ.Models.ViewModels
         [MinLength(1, ErrorMessage = "At least one department must be selected.")]
         public List<DepartmentClearanceInput> Departments { get; set; } = new();
 
-        // Items
-        /*[MinLength(1, ErrorMessage = "At least one item must be added.")]*/
-        public List<CreateItemInput> Items { get; set; } = new();
+
     }
 }

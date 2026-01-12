@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<_LAB__QC_HQ.Models.Content>
 
-<h2>Know How Content List</h2>
+<h2>Content List</h2>
 
 <!-- Simple Search Box -->
 <div class="mb-3">
@@ -18,14 +18,14 @@
             <th>Created At</th>
             @if (User.IsInRole("Admin"))
             {
-                <th>Actions</th>
+                <th>Actions</th>            
             }
     </thead>
     <tbody>
         @foreach (var content in Model)
         {
             <tr class="@(content.IsActive ? "" : "table-secondary text-muted")">
-
+                
                 <td>
                     <a asp-controller="ContentBrowse"
                        asp-action="Details"
@@ -49,58 +49,56 @@
                 </td>
                 <td>@content.CreatedByNavigation?.UserName</td>
                 <td>@content.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                @if (User.IsInRole("Admin"))
-                {
+                @if (User.IsInRole("Admin")){
 
-                    <td>
-                        <form asp-controller="ContentBrowse"
-                              asp-action="Edit"
-                              asp-route-id="@content.ContentId">
-                            <button type="submit" class="btn btn-sm">
-                                Edit
-                            </button>
-                        </form>
+                <td>
+                    <form asp-controller="ContentBrowse"
+                          asp-action="Edit"
+                          asp-route-id="@content.ContentId">
+                        <button type="submit" class="btn btn-sm">
+                             Edit
+                        </button>
+                    </form>
 
-                        @if (content.IsActive)
-                        {
-                            <form asp-controller="ContentBrowse"
-                                  asp-action="Deactivate"
-                                  asp-route-id="@content.ContentId"
-                                  method="post"
-                                  style="display:inline;">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-warning btn-sm">
-                                    <i class="bi bi-eye-slash"> Deactivate</i>
-                                </button>
-                            </form>
-                        }
-                        else
-                        {
-                            <form asp-controller="ContentBrowse"
-                                  asp-action="Activate"
-                                  asp-route-id="@content.ContentId"
-                                  method="post"
-                                  style="display:inline;">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-success btn-sm">
-                                    <i class="bi bi-eye"> Activate</i>
-                                </button>
-                            </form>
-                        }
-                        <!-- Delete Button -->
+                    @if (content.IsActive)
+                    {
                         <form asp-controller="ContentBrowse"
-                              asp-action="Delete"
+                              asp-action="Deactivate"
                               asp-route-id="@content.ContentId"
                               method="post"
-                              onsubmit="return confirmDelete(this);"
-                              style="display: inline;">
+                              style="display:inline;">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="bi bi-trash"></i>  Delete
+                            <button type="submit" class="btn btn-warning btn-sm">
+                                <i class="bi bi-eye-slash"> Deactivate</i>
                             </button>
                         </form>
-                    </td>
-                }
+                    }
+                    else
+                    {
+                        <form asp-controller="ContentBrowse"
+                              asp-action="Activate"
+                              asp-route-id="@content.ContentId"
+                              method="post"
+                              style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="bi bi-eye"> Activate</i>
+                            </button>
+                        </form>
+                    }
+                    <!-- Delete Button -->
+                    <form asp-controller="ContentBrowse"
+                          asp-action="Delete"
+                          asp-route-id="@content.ContentId"
+                          method="post"
+                          onsubmit="return confirmDelete(this);"
+                          style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash"></i>  Delete
+                        </button>
+                    </form>
+                </td>}
             </tr>
         }
     </tbody>

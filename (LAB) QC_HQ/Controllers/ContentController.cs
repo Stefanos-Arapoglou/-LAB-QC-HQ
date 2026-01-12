@@ -1,4 +1,15 @@
-﻿using _LAB__QC_HQ.Interfaces;
+﻿/* NOTES
+ 
+This Controller serves as a base class for other content-related controllers, providing shared functionality
+since it is abstract and cannot be instantiated on its own, and can have no POST actions.
+
+Main porpuses as of now are:
+    1) Provide shared methods for permission checks (view, edit, delete)
+    2) Provide shared method to get content by ID
+ 
+ */
+
+using _LAB__QC_HQ.Interfaces;
 using _LAB__QC_HQ.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -26,8 +37,10 @@ namespace _LAB__QC_HQ.Controllers
             _itemService = itemService;
         }
 
-        protected string CurrentUserId =>
-    _userManager.GetUserId(User)!;
+        // Helper to get the current user's ID, used mainly for permissioning checks
+        protected string CurrentUserId => _userManager.GetUserId(User)!;
+
+
 
         // Shared method to check if user can view content
         protected bool CanView(int contentId)
@@ -35,20 +48,28 @@ namespace _LAB__QC_HQ.Controllers
             return _authService.CanView(contentId, CurrentUserId);
         }
 
-        // Shared method to get content by id
-        protected Content? GetContent(int contentId)
-        {
-            return _contentService.GetContentById(contentId);
-        }
 
+
+        // Shared method to check if user can delete content
         protected bool CanDelete(int contentId)
         {
             return _authService.CanDelete(contentId, CurrentUserId);
         }
 
+
+
+        // Shared method to check if user can edit content
         protected bool CanEdit(int contentId)
         {
             return _authService.CanEdit(contentId, CurrentUserId);
+        }
+
+
+
+        // Shared method to get content by id (NOT USED AS OF NOW)
+        protected Content? GetContent(int contentId)
+        {
+            return _contentService.GetContentById(contentId);
         }
 
     }

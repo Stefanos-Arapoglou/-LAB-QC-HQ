@@ -1,71 +1,186 @@
-﻿@model IList<_LAB__QC_HQ.Models.DTO.CreateItemInput>
+﻿@model _LAB__QC_HQ.Models.ViewModels.EditContentViewModel
 
-<div id="items-container">
-    @for (int i = 0; i < Model.Count; i++)
+<!-- Items Container with Drag & Drop -->
+<div id="items-container" class="sortable-items-container">
+    @for (int i = 0; i < Model.Items.Count; i++)
     {
-        bool isImage = Model[i].ItemType == "Image";
-        bool isFile = Model[i].ItemType == "File";
+        var item = Model.Items[i];
+        bool isImage = item.ItemType == "Image";
+        bool isFile = item.ItemType == "File";
+        bool hasExistingFile = !string.IsNullOrEmpty(item.ItemValue) && (isImage || isFile);
 
-        <div class="item-entry mb-3 border p-2 rounded position-relative">
-            <!-- Hidden fields for IDs and existing values -->
-            <input asp-for="@Model[i].ItemId" type="hidden" />
-            <input asp-for="@Model[i].DisplayOrder" type="hidden" />
-            <input asp-for="@Model[i].ItemType" type="hidden" class="item-type-hidden" />
+        <div class="item-entry mb-3 border p-3 rounded position-relative sortable-item"
+             data-item-id="@item.ItemId"
+             data-display-order="@item.DisplayOrder">
 
-            <!-- For existing Image/File, keep ItemValue as hidden -->
-            @if (isImage || isFile)
+            <!-- Drag Handle -->
+            <div class="sortable-handle position-absolute top-0 start-0 m-1" style="cursor: move;">
+                <i class="bi bi-grip-vertical text-muted"></i>
+            </div>
+
+            <!-- Hidden Fields -->
+            <input asp-for="Items[i].ItemId" type="hidden" class="item-id-input" />
+            <input asp-for="Items[i].DisplayOrder" type="hidden" class="display-order-input" value="@item.DisplayOrder" />
+            <input asp-for="Items[i].ItemType" type="hidden" class="item-type-hidden" />
+
+            @if (hasExistingFile)
             {
-                <input asp-for="@Model[i].ItemValue" type="hidden" class="item-value-hidden" />
+                <input asp-for="Items[i].ItemValue" type="hidden" class="item-value-hidden" />
             }
 
-            <!-- Display order (readonly) -->
-            <input class="form-control form-control-sm order-input d-inline w-auto me-2"
-                   value="@Model[i].DisplayOrder"
-                   readonly />
+            <div class="row">
+                <!-- Order Badge -->
+                <div class="col-auto">
+                    <span class="badge bg-secondary order-badge">#@item.DisplayOrder</span>
+                </div>
 
-            <!-- Title -->
-            <input asp-for="@Model[i].ItemTitle"
-                   class="form-control mb-1"
-                   placeholder="Item title / description"
-                   required />
+                <!-- Type Selector -->
+                <div class="col-md-3">
+                    <select asp-for="Items[i].ItemType"
+                            class="form-select mb-2 item-type-select"
+                            onchange="itemsEditor.handleTypeChange(this)">
+                        <option value="Text">Text</option>
+                        <option value="Link">Link</option>
+                        <option value="Image">Image</option>
+                        <option value="File">File</option>
+                    </select>
+                </div>
 
-            <!-- Type selector -->
-            <select class="form-select mb-1 item-type-select">
-                <option value="Text">Text</option>
-                <option value="Image">Image</option>
-                <option value="Link">Link</option>
-                <option value="File">File</option>
-            </select>
+                <!-- Title -->
+                <div class="col-md-5">
+                    <input asp-for="Items[i].ItemTitle"
+                           class="form-control mb-2 item-title-input"
+                           placeholder="Item title"
+                           required />
+                </div>
 
-            <!-- Value (for Text/Link) -->
-            <textarea asp-for="@Model[i].ItemValue"
-                      class="form-control mb-1 item-value-text"
-                      placeholder="Text or URL"
-                      rows="1"
-                      style="@(isImage || isFile ? "display:none" : "")">
-                </textarea>
+                <!-- Actions -->
+                <div class="col-auto ms-auto">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger remove-item-btn"
+                            onclick="itemsEditor.removeItem(this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
 
-            <!-- Image preview if existing image -->
-            @if (isImage && !string.IsNullOrEmpty(Model[i].ItemValue))
+            <!-- Image/File Preview Area (shown when has existing file) -->
+            @if (hasExistingFile)
             {
-                <div class="mb-1">
-                    <img src="@Model[i].ItemValue" class="img-thumbnail" style="max-height: 100px;" />
-                    <small class="text-muted">Current image</small>
+                <div class="item-preview mt-2">
+                    @if (isImage)
+                    {
+                        <div class="image-preview text-center">
+                            <img src="/uploads/images/@item.ItemValue"
+                                 alt="@item.ItemTitle"
+                                 class="img-thumbnail"
+                                 style="max-height: 150px;" />
+                        </div>
+                    }
+                    else if (isFile)
+                    {
+                        <div class="file-preview p-2 bg-light rounded">
+                            <i class="bi bi-file-earmark"></i>
+                            <span>@item.ItemValue</span>
+                        </div>
+                    }
                 </div>
             }
 
-            <!-- File upload (for new file) -->
-            <input type="file"
-                   class="form-control mb-1 file-upload"
-                   style="@(!isImage && !isFile ? "display:none" : "")" />
+            <!-- Content Editing Area - Always Visible -->
+            <div class="item-edit-fields mt-2">
+                <!-- Value Input (for Text/Link) -->
+                <div class="mb-2 value-input-container" style="@(isImage || isFile ? "display:none;" : "")">
+                    <textarea asp-for="Items[i].ItemValue"
+                              class="form-control item-value-textarea"
+                              rows="3"
+                              placeholder="Enter content or URL"></textarea>
+                </div>
 
-            <!-- Remove button -->
-            <button type="button"
-                    class="btn btn-outline-danger btn-sm remove-item position-absolute top-0 end-0 m-1">
-                ✖
-            </button>
+                <!-- File Upload (for Image/File) -->
+                <div class="mb-2 file-upload-container" style="@(!isImage && !isFile ? "display:none;" : "")">
+                    <input type="file"
+                           asp-for="Items[i].FileUpload"
+                           class="form-control file-upload-input"
+                           accept="@(isImage ? "image/*" : "*/*")" />
+                    @if (hasExistingFile)
+                    {
+                        <small class="text-muted d-block mt-1">
+                            Current file: @item.ItemValue
+@*                             <button type="button"
+                                    class="btn btn-sm btn-outline-warning ms-2"
+                                    onclick="itemsEditor.clearFile(this)">
+                                Clear
+                            </button> *@
+                        </small>
+                    }
+                </div>
+            </div>
         </div>
     }
 </div>
 
-<button type="button" class="btn btn-secondary mb-3" id="add-item">Add Item</button>
+<!-- Add Item Button -->
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <div>
+        <button type="button" class="btn btn-success" id="add-item-btn">
+            <i class="bi bi-plus-circle"></i> Add New Item
+        </button>
+    </div>
+    <small class="text-muted">
+        <i class="bi bi-grip-vertical"></i> Drag handles to reorder items
+    </small>
+</div>
+
+<!-- Item Template for JavaScript (Hidden) -->
+<template id="item-template">
+    <div class="item-entry mb-3 border p-3 rounded position-relative sortable-item" data-item-id="0">
+        <!-- Template content will be populated by JavaScript -->
+    </div>
+</template>
+
+<!-- Styles for the items editor -->
+<style>
+    .sortable-items-container {
+        min-height: 50px;
+    }
+
+    .sortable-item {
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+        .sortable-item:hover {
+            background-color: #e9ecef;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .sortable-item.sortable-ghost {
+            opacity: 0.4;
+            background-color: #e9ecef;
+        }
+
+        .sortable-item.sortable-chosen {
+            background-color: #f0f7ff;
+        }
+
+    .item-edit-fields {
+        border-top: 1px dashed #dee2e6;
+        padding-top: 15px;
+    }
+
+    .sortable-handle {
+        opacity: 0.5;
+        transition: opacity 0.2s;
+    }
+
+        .sortable-handle:hover {
+            opacity: 1;
+        }
+
+    .item-preview {
+        border-bottom: 1px dashed #dee2e6;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+</style>
