@@ -1,4 +1,13 @@
-﻿using _LAB__QC_HQ.Models.DTO;
+﻿/* NOTES 
+ 
+Used for all parts regarding the creation of Know-How content (Controller/Services/ViewModel)
+All other types will have a similar structure but different specific ViewModels and Services
+
+It inherits from EditContentViewModel to reuse common content properties (ContentId, Items, Departments, Title) 
+
+ */
+
+using _LAB__QC_HQ.Models.DTO;
 using System.ComponentModel.DataAnnotations;
 
 namespace _LAB__QC_HQ.Models.ViewModels

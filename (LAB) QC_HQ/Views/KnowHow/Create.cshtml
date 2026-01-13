@@ -33,9 +33,6 @@
         <partial name="_DepartmentsEditor" model="Model"/>
     </div>
 
-@*     <h4>Items</h4>
-    @await Html.PartialAsync("_ItemsEditor", Model.Items) *@
-    @* <button type="button" class="btn btn-secondary mb-3" id="add-item">Add Another Item</button> *@
     <br />
 
     <h4>Items</h4>
@@ -54,7 +51,6 @@
         document.addEventListener("DOMContentLoaded", function () {
             initItemsEditor("items-container", "add-item");
 
-            // If you want to pre-load departments options
             setDepartmentsOptions(`
                 @foreach (var dep in ViewBag.Departments)
                 {

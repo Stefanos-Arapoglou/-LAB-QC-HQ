@@ -19,8 +19,6 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     options.SignIn.RequireConfirmedAccount = false; // Keep true to test email confirmation
     options.SignIn.RequireConfirmedEmail = false;
     options.User.RequireUniqueEmail = true;
-
-    // Optional: Relax password rules for testing
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;

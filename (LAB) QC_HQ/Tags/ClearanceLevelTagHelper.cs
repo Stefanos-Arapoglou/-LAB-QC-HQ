@@ -1,4 +1,12 @@
-﻿using Microsoft.AspNetCore.Razor.TagHelpers;
+﻿/* NOTES 
+ 
+Mostly tried it out to see functionality that it provides for Razor views.
+It's very helpfull to create custom tags that can be reused across the application. 
+Used exclusively for displaying clearance levels in a standardized way as of now, may be expanded in the future.
+ 
+ */
+
+using Microsoft.AspNetCore.Razor.TagHelpers;
 
 [HtmlTargetElement("clearance-level")]
 public class ClearanceLevelTagHelper : TagHelper
@@ -9,9 +17,6 @@ public class ClearanceLevelTagHelper : TagHelper
     {
         output.TagName = "span";
         output.Attributes.SetAttribute("class", $"clearance-level-{Level}");
-
-        // KEEP whatever content is inside the tag
-        // Don't change the text at all
         output.Content.SetHtmlContent(context.AllAttributes["level"]?.Value.ToString() ?? Level.ToString());
     }
 }

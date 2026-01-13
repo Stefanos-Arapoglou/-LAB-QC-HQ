@@ -1,4 +1,8 @@
 ﻿@using _LAB__QC_HQ
 @using _LAB__QC_HQ.Models
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@* 
+SOS! when <assembly></assembly> name is not present in the cproj file, the default namespace is the name of the file!!
+to make the tag helper we need to load the name of the file (bad practice) *@
 @addTagHelper *, (LAB) QC_HQ

@@ -1,4 +1,13 @@
-﻿using _LAB__QC_HQ.Interfaces;
+﻿/* NOTES 
+ 
+This is an abstract base ViewModel for editing content, containing common properties shared across different content types.
+Each type (if needed) inherits from this base ViewModel and adds the type-specific properties.
+
+Interface IContentEditBase is implemented to ensure consistency across different content edit ViewModels.
+
+ */
+
+using _LAB__QC_HQ.Interfaces;
 using _LAB__QC_HQ.Models.DTO;
 using System.ComponentModel.DataAnnotations;
 
@@ -19,6 +28,6 @@ namespace _LAB__QC_HQ.Models.ViewModels
         public List<DepartmentClearanceInput> Departments { get; set; } = new();
 
         // Add Items property here
-        public List<CreateItemInput> Items { get; set; } = new();
+        public List<EditItemInput> Items { get; set; } = new();
     }
 }

@@ -1,4 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿/*NOTES
+
+Was used to fix a bug
+
+ */
+
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace _LAB__QC_HQ.MetaData
 {
