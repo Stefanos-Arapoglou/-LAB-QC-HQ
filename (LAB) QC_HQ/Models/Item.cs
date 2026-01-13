@@ -1,9 +1,12 @@
-﻿using System;
+﻿using _LAB__QC_HQ.MetaData;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace _LAB__QC_HQ.Models;
 
+[ModelMetadataType(typeof(ItemMetadata))]
 public partial class Item
 {
     public int ItemId { get; set; }

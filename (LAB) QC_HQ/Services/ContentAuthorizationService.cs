@@ -1,4 +1,14 @@
-﻿using _LAB__QC_HQ.Data;
+﻿/* NOTES 
+ 
+Contains all the Logic for content authorization, based on user roles and department clearance levels.
+    1) CanView
+    2) CanEdit
+    3) CanDelete
+    4) isAdmin (private helper method)
+ 
+ */
+
+using _LAB__QC_HQ.Data;
 using _LAB__QC_HQ.Interfaces;
 using _LAB__QC_HQ.Models;
 using Microsoft.AspNetCore.Identity;
@@ -19,6 +29,7 @@ namespace _LAB__QC_HQ.Services
             _userManager = userManager;
         }
 
+        // Check if user can view the content based on clearance level
         public bool CanView(int contentId, string userId)
         {
 
@@ -37,24 +48,35 @@ namespace _LAB__QC_HQ.Services
         }
 
 
+
+        // Check if user can edit the content (only Admin can edit as of now)
         public bool CanEdit(int contentId, string userId)
         {
             // Only Admin can edit
             return IsAdmin(userId);
         }
 
+
+
+        // Check if user can delete the content (only Admin can delete as of now)
         public bool CanDelete(int contentId, string userId)
         {
             // Only Admin can delete
             return IsAdmin(userId);
         }
 
-/*        public bool CanCreate(string userId)
+
+
+        // Check if user can create content (Not Implemented as of now)
+        public bool CanCreate(string userId)
         {
             // Only Admin can create
             return IsAdmin(userId);
-        }*/
+        }
 
+
+
+        // Private helper method to check if user is in Admin role
         private bool IsAdmin(string userId)
         {
             if (string.IsNullOrEmpty(userId))

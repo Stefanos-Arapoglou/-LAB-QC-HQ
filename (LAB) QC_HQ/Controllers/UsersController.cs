@@ -1,4 +1,19 @@
-﻿using _LAB__QC_HQ.Data;
+﻿/* NOTES 
+ 
+Here we manage everything related to application users, including listing users
+Everything goes through Microsoft Identity UserManager!
+
+SUMMARY:
+    1) HANDLES LISTING of all users
+    2) HANDLES VIEWING of user details
+    3) HANDLES CREATION of new users
+    4) HANDLES EDITING of existing users
+    5) HANDLES DELETION of users
+
+ */
+
+
+using _LAB__QC_HQ.Data;
 using _LAB__QC_HQ.Models;
 using _LAB__QC_HQ.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +37,9 @@ namespace _LAB__QC_HQ.Controllers
             _userManager = userManager;
         }
 
-        // GET: Users - List all users
+
+        // GET: UsersController
+        // Lists all users
         public async Task<IActionResult> Index()
         {
             var users = await _context.Users
@@ -32,8 +49,11 @@ namespace _LAB__QC_HQ.Controllers
             return View(users);
         }
 
+
+
         // GET: UsersController/Details/5
-        public async Task<IActionResult> Details(string id)  // Change to string
+        // View user details
+        public async Task<IActionResult> Details(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -53,7 +73,10 @@ namespace _LAB__QC_HQ.Controllers
             return View(user);
         }
 
+
+
         // GET: Users/Create
+        // Show create user form
         public IActionResult Create()
         {
             var vm = new CreateUserVM
@@ -72,7 +95,10 @@ namespace _LAB__QC_HQ.Controllers
             return View(vm);
         }
 
+
+
         // POST: UsersController/Create
+        // Create new user
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserVM model)
@@ -123,7 +149,10 @@ namespace _LAB__QC_HQ.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+
         // GET: UsersController/Edit/5
+        // Show edit user form
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null) return NotFound();
@@ -166,6 +195,10 @@ namespace _LAB__QC_HQ.Controllers
             return View(vm);
         }
 
+
+
+        // POST: UsersController/Edit/5
+        // Handle edit user form submission
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditUserVM vm)
@@ -233,7 +266,9 @@ namespace _LAB__QC_HQ.Controllers
         }
 
 
+
         // POST: UsersController/Delete/5
+        // Handle user deletion
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
@@ -258,6 +293,8 @@ namespace _LAB__QC_HQ.Controllers
         }
 
 
+
+        //Helper method to populate departments
         private async Task PopulateDepartments(EditUserVM vm)
         {
             var allDepartments = await _context.Departments
@@ -271,6 +308,9 @@ namespace _LAB__QC_HQ.Controllers
             }
         }
 
+
+
+        //Helper method to populate department names
         private void PopulateDepartmentNames(EditUserVM model)
         {
             var departmentLookup = _context.Departments
@@ -283,6 +323,8 @@ namespace _LAB__QC_HQ.Controllers
         }
 
 
+
+        // Helper to add IdentityResult errors to ModelState
         private void AddErrors(IdentityResult result)
         {
             foreach (var error in result.Errors)

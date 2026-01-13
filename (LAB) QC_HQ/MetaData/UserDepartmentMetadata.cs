@@ -1,4 +1,11 @@
-﻿namespace _LAB__QC_HQ.MetaData
+﻿/*NOTES
+
+In reality, EFCore does NOT understand the [column] of a metadata. 
+I am keeping this Metadata for future reference, in case I need to add attributes, but as of now it is useless
+
+ */
+
+namespace _LAB__QC_HQ.MetaData
 {
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;

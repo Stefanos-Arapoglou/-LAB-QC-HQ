@@ -1,4 +1,29 @@
-﻿using _LAB__QC_HQ.Data;
+﻿/* NOTES 
+ 
+Cream and butter of Content logic - handles all CRUD operations for Content and related entities.
+    1) GET METHODS
+        - GetBrowsableContent
+        - GetAllContentIncludingInactive
+        - GetAllContent
+        - GetTypeContentIncludingInactive
+        - GetAllTypeContent
+        - GetContentById
+        - GetKnowHowDetail
+        - GetAllDepartments
+        - GetContentTypeAsync (helper method)
+    
+    2) CREATE / UPDATE / DELETE METHODS
+        - CreateContent
+        - DeleteContentAsync
+        - UpdateContentAsync
+
+    3) ACTIVATE / DEACTIVATE METHODS
+        - ActivateContentAsync
+        - DeactivateContentAsync
+ 
+ */
+
+using _LAB__QC_HQ.Data;
 using _LAB__QC_HQ.Interfaces;
 using _LAB__QC_HQ.Models;
 using _LAB__QC_HQ.Models.DTO;
@@ -17,44 +42,11 @@ namespace _LAB__QC_HQ.Services
             _db = db;
         }
 
-        public Content CreateContent(
-            string title,
-            ContentType contentType,
-            string userId,
-            IEnumerable<DepartmentClearanceInput> departments)
-        {
-            if (departments == null || !departments.Any())
-                throw new InvalidOperationException(
-                    "Content must be assigned to at least one department.");
 
-            var content = new Content
-            {
-                Title = title,
-                ContentType = contentType.ToDbString(),
-                CreatedBy = userId,
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true,
-                TimesViewed = 0
-            };
-
-            _db.Contents.Add(content);
-            _db.SaveChanges();
-
-            foreach (var dep in departments)
-            {
-                _db.ContentDepartments.Add(new ContentDepartment
-                {
-                    ContentId = content.ContentId,
-                    DepartmentId = dep.DepartmentId,
-                    ClearanceLevelRequired = dep.ClearanceLevelRequired
-                });
-            }
-
-            _db.SaveChanges();
-            return content;
-        }
+        // ~~~~~~~~~~~~   GET METHODS   ~~~~~~~~~~~~
 
 
+        // Gets all content that is active, including related entities
         public IEnumerable<Content> GetBrowsableContent()
         {
             return _db.Contents
@@ -66,6 +58,9 @@ namespace _LAB__QC_HQ.Services
                 .ToList();
         }
 
+
+
+        // Gets all content including inactive, with related entities
         public IEnumerable<Content> GetAllContentIncludingInactive()
         {
             return _db.Contents
@@ -76,11 +71,17 @@ namespace _LAB__QC_HQ.Services
                 .ToList();
         }
 
+
+
+        // Gets all active content without related entities
         public IEnumerable<Content> GetAllContent()
         {
             return _db.Contents.Where(c => c.IsActive).ToList();
         }
 
+
+
+        // Gets all content of a specific type, including inactive, with related entities
         public IEnumerable<Content> GetTypeContentIncludingInactive(ContentType contentType)
         {
             return _db.Contents
@@ -92,6 +93,9 @@ namespace _LAB__QC_HQ.Services
                 .ToList();
         }
 
+
+
+        // Gets all active content of a specific type without related entities
         public IEnumerable<Content> GetAllTypeContent(ContentType contentType)
         {
             return _db.Contents
@@ -101,29 +105,40 @@ namespace _LAB__QC_HQ.Services
         }
 
 
+
+        // Gets a specific content by ID if active
         public Content? GetContentById(int contentId)
         {
             return _db.Contents.FirstOrDefault(c => c.ContentId == contentId && c.IsActive);
         }
 
+
+
+        // Gets KnowHowDetail by ContentId including related entities
         public KnowHowDetail? GetKnowHowDetail(int contentId)
         {
             return _db.KnowHowDetails
-                .Include(k => k.Content)                     // Include the Content entity
-                    .ThenInclude(c => c.ContentDepartments) // Include Departments
+                .Include(k => k.Content)                     
+                    .ThenInclude(c => c.ContentDepartments) 
                         .ThenInclude(cd => cd.Department)
                 .Include(k => k.Content)
-                    .ThenInclude(c => c.Items)              // Include Items
+                    .ThenInclude(c => c.Items)              
                 .Include(k => k.Content)
-                    .ThenInclude(c => c.CreatedByNavigation)// Include CreatedBy navigation
+                    .ThenInclude(c => c.CreatedByNavigation)
                 .FirstOrDefault(k => k.ContentId == contentId && k.IsActive);
         }
 
+
+
+        // Gets all departments ordered by name
         public IEnumerable<Department> GetAllDepartments()
         {
             return _db.Departments.OrderBy(d => d.Name).ToList();
         }
 
+
+
+        // Helper method to get ContentType enum from database string
         public async Task<ContentType> GetContentTypeAsync(int contentId)
         {
             // Get the string value from database (exactly as stored by ToDbString())
@@ -147,7 +162,59 @@ namespace _LAB__QC_HQ.Services
             };
         }
 
-        // Add to ContentService class
+
+
+
+
+        // ~~~~~~~~~~~~   CREATE / UPDATE / DELETE METHODS   ~~~~~~~~~~~~
+
+
+        // Creates a new content entry with associated department clearances
+        public Content CreateContent(
+            string title,
+            ContentType contentType,
+            string userId,
+            IEnumerable<DepartmentClearanceInput> departments)
+        {
+            //Must be assigned to at least one department
+            if (departments == null || !departments.Any())
+                throw new InvalidOperationException(
+                    "Content must be assigned to at least one department.");
+
+            //Inserting new content record
+            var content = new Content
+            {
+                Title = title,
+                ContentType = contentType.ToDbString(),
+                CreatedBy = userId,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true,
+                TimesViewed = 0
+            };
+
+            // saving to db. ContentId will be generated
+            _db.Contents.Add(content);
+            _db.SaveChanges();
+
+            //Assigning departments with clearance levels, now that ContentId is known
+            foreach (var dep in departments)
+            {
+                _db.ContentDepartments.Add(new ContentDepartment
+                {
+                    ContentId = content.ContentId,
+                    DepartmentId = dep.DepartmentId,
+                    ClearanceLevelRequired = dep.ClearanceLevelRequired
+                });
+            }
+
+            // Final save
+            _db.SaveChanges();
+            return content;
+        }
+
+
+
+        // Deletes content and all related records in a transaction
         public async Task<bool> DeleteContentAsync(int contentId)
         {
             using var transaction = await _db.Database.BeginTransactionAsync();
@@ -205,11 +272,15 @@ namespace _LAB__QC_HQ.Services
             }
         }
 
+
+
+        // Updates content title and department clearances
         public async Task UpdateContentAsync(
             int contentId,
             string title,
             IEnumerable<DepartmentClearanceInput> departments)
         {
+            // Fetch existing content with related departments
             var content = await _db.Contents
                 .Include(c => c.ContentDepartments)
                 .FirstOrDefaultAsync(c => c.ContentId == contentId);
@@ -217,19 +288,20 @@ namespace _LAB__QC_HQ.Services
             if (content == null)
                 throw new KeyNotFoundException($"Content {contentId} not found.");
 
-            // 1️⃣ Update scalar fields
+            // Update Title
             content.Title = title.Trim();
 
-            // 2️⃣ Validate departments
+            // Update Departments
             var departmentList = departments
                 .Where(d => d.DepartmentId > 0)
                 .ToList();
 
+            // Atleast one department must be assigned
             if (!departmentList.Any())
                 throw new InvalidOperationException(
                     "At least one department must be assigned.");
 
-            // ❗ Enforce uniqueness
+            // Enforcing unique department assignments
             if (departmentList
                 .GroupBy(d => d.DepartmentId)
                 .Any(g => g.Count() > 1))
@@ -238,7 +310,7 @@ namespace _LAB__QC_HQ.Services
                     "Each department can only be assigned once.");
             }
 
-            // 3️⃣ Replace department assignments (safe way)
+            // Replace department assignments
             _db.ContentDepartments.RemoveRange(content.ContentDepartments);
 
             foreach (var dep in departmentList)
@@ -251,10 +323,16 @@ namespace _LAB__QC_HQ.Services
                 });
             }
 
+            // Final save
             await _db.SaveChangesAsync();
         }
 
 
+
+        //~~~~~~~~~~~~~   ACTIVATE / DEACTIVATE METHODS   ~~~~~~~~~~~~
+
+
+        // Activates content by setting IsActive to true
         public async Task ActivateContentAsync(int contentId)
         {
             var content = await _db.Contents.FindAsync(contentId);
@@ -265,6 +343,9 @@ namespace _LAB__QC_HQ.Services
             await _db.SaveChangesAsync();
         }
 
+
+
+        // Deactivates content by setting IsActive to false
         public async Task DeactivateContentAsync(int contentId)
         {
             var content = await _db.Contents.FindAsync(contentId);

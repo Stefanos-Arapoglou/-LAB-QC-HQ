@@ -21,7 +21,13 @@
             <tr>
                 <td>@role.Name</td>
                 <td>
-                    <a asp-action="Delete" asp-route-id="@role.Id" class="btn btn-sm btn-warning">Delete</a>
+                    @if (role.Name !="Admin" && role.Name!="User") {
+                        <a asp-action="Delete" asp-route-id="@role.Id" class="btn btn-sm btn-warning">Delete</a>                
+                    }
+                    else
+                    {
+                      <span class="text-muted">Can not delete this role</span>
+                    }
                 </td>
             </tr>
         }

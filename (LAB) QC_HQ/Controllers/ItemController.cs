@@ -51,7 +51,7 @@ namespace _LAB__QC_HQ.Controllers
         // POST: /Item/UpdateItems/5
         // Updates multiple items associated with a content (WILL BE REMOVED)
         [HttpPost]
-        public async Task<IActionResult> UpdateItems(int contentId, List<CreateItemInput> items)
+        public async Task<IActionResult> UpdateItems(int contentId, List<EditItemInput> items)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

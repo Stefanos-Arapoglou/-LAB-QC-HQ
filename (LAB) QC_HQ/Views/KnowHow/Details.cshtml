@@ -10,21 +10,33 @@
     var fileItems = orderedItems.Where(i => i.ItemType == "File").ToList();
 }
 
-<h2>@content.Title (@content.ContentType)</h2>
+<div class="title-container text-center p-3 mb-4 border rounded">
+    <h2 class="mb-0">@content.Title <span class="text-muted fs-4">(@content.ContentType)</span></h2>
+</div>
 
 <!-- 1) Basic Content Info -->
-<div class="card mb-4">
+<div class="card mb-4 info-container">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Content Details</h5>
+        @if (User.IsInRole("Admin"))
+        {
+            <a href="@Url.Action("Edit", "KnowHow", new { id = content.ContentId })"
+               class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-pencil"></i> Edit
+            </a>
+        }
+    </div>
     <div class="card-body">
         <div class="row">
             <div class="col-md-6">
-                <p><strong>Code:</strong> @Model.Code</p>
-                <p><strong>Risk Level:</strong> @Model.RiskLevel</p>
-                <p><strong>Created By:</strong> @content.CreatedByNavigation?.UserName</p>
+                <p class="mb-2"><strong>Code:</strong> <span class="text-muted">@Model.Code</span></p>
+                <p class="mb-2"><strong>Risk Level:</strong> <span class="text-muted">@Model.RiskLevel</span></p>
+                <p class="mb-2"><strong>Created By:</strong> <span class="text-muted">@content.CreatedByNavigation?.UserName</span></p>
             </div>
             <div class="col-md-6">
-                <p><strong>Created At:</strong> @content.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
-                <p><strong>Times Viewed:</strong> @content.TimesViewed</p>
-                <p><strong>Content ID:</strong> @content.ContentId</p>
+                <p class="mb-2"><strong>Created At:</strong> <span class="text-muted">@content.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span></p>
+                <p class="mb-2"><strong>Times Viewed:</strong> <span class="text-muted">@content.TimesViewed</span></p>
+                <p class="mb-2"><strong>Content ID:</strong> <span class="text-muted">@content.ContentId</span></p>
             </div>
         </div>
     </div>
@@ -195,6 +207,36 @@ else if (orderedItems.Any())
     .link-content a {
         word-break: break-all;
     }
+
+    .title-container {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0 !important;
+        transition: all 0.3s ease;
+    }
+
+        .title-container:hover {
+            background-color: #fafafa;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-color: #d0d0d0 !important;
+        }
+
+    .info-container {
+        transition: all 0.3s ease;
+        border: 1px solid #e0e0e0;
+    }
+
+        .info-container:hover {
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            border-color: #d0d0d0;
+        }
+
+        .info-container .card-body {
+            background-color: #ffffff;
+        }
+
+        .info-container:hover .card-body {
+            background-color: #fafafa;
+        }
 </style>
 
 @section Scripts {

@@ -1,7 +1,13 @@
 ﻿/* NOTES 
  
 This is a type specific Controller for Know-How content, inheriting from ContentController.
+Part of the functionality is as of now handled by ContentBrowseController, but in future specific Know-How actions may be needed
 
+SUMMARY:
+    1) HANDLES CREATION of Know-How content
+    2) HANDLES VIEWING of Know-How content details
+    3) HANDLES EDITING of Know-How content
+    4) (AS OF NOW NOT NEEDED) HANDLES DELETION, ACTIVATION, DEACTIVATION of Know-How content (handled by ContentBrowseController for now)
  
  
  */

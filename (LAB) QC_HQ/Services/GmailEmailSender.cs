@@ -1,4 +1,10 @@
-﻿// Services/GmailEmailSender.cs
+﻿/* NOTES 
+ 
+This service implements email sending functionality using Gmail's SMTP server via the MailKit library.
+Only one method as of now, will be expanded if needed. 
+
+ */
+
 using MailKit.Net.Smtp;
 using MimeKit;
 using Microsoft.Extensions.Options;
@@ -19,6 +25,8 @@ namespace _LAB__QC_HQ.Services
             _logger = logger;
         }
 
+
+        // Send email asynchronously with detailed logging for debugging
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
             // LOG 1: Method called

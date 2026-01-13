@@ -3,9 +3,10 @@
 This Controller serves as a base class for other content-related controllers, providing shared functionality
 since it is abstract and cannot be instantiated on its own, and can have no POST actions.
 
-Main porpuses as of now are:
-    1) Provide shared methods for permission checks (view, edit, delete)
-    2) Provide shared method to get content by ID
+SUMMARY:
+    1) PROVIDES SHARED DEPENDENCY INJECTION for content services, authorization, user management, environment, and item services
+    2) OFFERS HELPER METHODS to check user permissions (view, edit, delete) on content
+    3) OFFERS HELPER METHOD to get content by ID (NOT USED AS OF NOW)
  
  */
 

@@ -1,4 +1,10 @@
-﻿namespace _LAB__QC_HQ.Models.ViewModels
+﻿/*NOTES
+ 
+Used for the Assign Role view model
+ 
+ */
+
+namespace _LAB__QC_HQ.Models.ViewModels
 {
     public class AssignRoleViewModel
     {
