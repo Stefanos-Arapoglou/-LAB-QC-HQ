@@ -1,0 +1,56 @@
+﻿@model _LAB__QC_HQ.Models.ViewModels.EditContentViewModel
+@{
+    ViewData["Title"] = "Create Education";
+}
+
+<h2>Create Education</h2>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <partial name="_DepartmentsEditor" model="Model"/>
+    </div>
+
+    <br />
+
+    <h4>Items</h4>
+    <partial name="_ItemsEditor" model="Model"/>
+    <br />
+
+   
+
+
+
+    <button type="submit" class="btn btn-primary">Create Education</button>
+</form>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            initItemsEditor("items-container", "add-item");
+
+            setDepartmentsOptions(`
+                @foreach (var dep in ViewBag.Departments)
+                {
+                        <option value="@dep.DepartmentId">@dep.Name</option>
+                }
+            `);
+        });
+
+        window.departmentsOptions = `
+            @foreach (var dep in ViewBag.Departments)
+            {
+                    <option value="@dep.DepartmentId">@dep.Name</option>
+            }
+        `;
+    </script>
+
+    <script src="~/js/departments-editor.js"></script>
+    <script src="~/js/content-items.js"></script>
+
+}
