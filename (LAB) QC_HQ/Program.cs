@@ -34,6 +34,7 @@ builder.Services.AddControllersWithViews();
 //added services for content
 builder.Services.AddScoped<IContentService, ContentService>();
 builder.Services.AddScoped<IKnowHowService, KnowHowService>();
+builder.Services.AddScoped<IEducationService, EducationService>();
 builder.Services.AddScoped<IContentAuthorizationService, ContentAuthorizationService>();
 builder.Services.AddScoped<IItemService, ItemService>();
 
